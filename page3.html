@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fourier Visualiser — MMI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0f0f0f;--ink2:#888;--ink3:#bbb;--border:#ececec;--off:#fafafa;--white:#fff}
+html,body{height:100vh;overflow:hidden;background:var(--white);color:var(--ink);font-family:'DM Mono',monospace}
+
+nav{position:fixed;top:0;left:0;right:0;height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;justify-content:space-between;z-index:100}
+.nav-left{font-family:'EB Garamond',Georgia,serif;font-size:15px;color:var(--ink2);text-decoration:none;letter-spacing:.02em;transition:color .15s}
+.nav-left:hover{color:var(--ink)}
+.nav-right{font-size:10px;font-weight:300;color:var(--ink3);letter-spacing:.1em}
+
+.split{display:grid;grid-template-columns:1fr 300px;height:calc(100vh - 52px);margin-top:52px}
+.left-col{display:grid;grid-template-rows:1fr 1fr 170px;border-right:1px solid var(--border);overflow:hidden}
+.pane{position:relative;overflow:hidden}
+.pane+.pane{border-top:1px solid var(--border)}
+.pane-label{position:absolute;top:10px;left:14px;font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;pointer-events:none;z-index:2}
+.pane canvas{position:absolute;top:0;left:0}
+
+.panel{background:var(--off);display:flex;flex-direction:column;overflow:hidden}
+.panel-header{padding:24px 24px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.panel-title{font-family:'EB Garamond',Georgia,serif;font-size:20px;font-weight:400;color:var(--ink);margin-bottom:4px}
+.panel-sub{font-size:9px;font-weight:300;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase}
+.panel-body{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px}
+.panel-body::-webkit-scrollbar{width:0}
+
+.sec-label{font-size:9px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.ctrl{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.ctrl label{font-size:9px;color:var(--ink2);letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between}
+.ctrl label span{color:var(--ink)}
+input[type=range]{width:100%;-webkit-appearance:none;height:2px;background:var(--border);border-radius:1px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--ink);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--ink);border:none}
+
+.div-line{height:1px;background:var(--border)}
+.action-row{display:flex;gap:6px}
+.btn{flex:1;padding:9px;background:var(--white);border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink2);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.btn:hover{border-color:var(--ink);color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.btn.primary:hover{background:#333}
+
+.preset-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.preset-btn{padding:8px 6px;background:var(--white);border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink2);cursor:pointer;text-align:center;transition:all .15s}
+.preset-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.metric{background:var(--white);padding:12px 14px}
+.metric-label{font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.metric-value{font-family:'EB Garamond',Georgia,serif;font-size:20px;color:var(--ink);line-height:1}
+
+.hbars{display:flex;flex-direction:column;gap:4px;max-height:190px;overflow-y:auto}
+.hbars::-webkit-scrollbar{width:0}
+.hbar{display:grid;grid-template-columns:30px 1fr 36px;align-items:center;gap:6px;font-size:9px;color:var(--ink2)}
+.hbar-track{height:4px;background:var(--off);border-radius:2px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:2px}
+.hbar-val{text-align:right;font-size:8px}
+
+.panel-footer{padding:14px 24px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:16px}
+.footer-link{font-size:9px;font-weight:300;color:var(--ink3);text-decoration:none;letter-spacing:.07em;transition:color .15s}
+.footer-link:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-left" href="index.html">Matteo Martin Ingram</a>
+  <div class="nav-right">Fourier Visualiser</div>
+</nav>
+
+<div class="split">
+  <div class="left-col">
+
+    <div class="pane" id="paneD">
+      <div class="pane-label">draw your wave</div>
+      <canvas id="cvD"></canvas>
+    </div>
+
+    <div class="pane" id="paneE">
+      <div class="pane-label">epicycle reconstruction</div>
+      <canvas id="cvE"></canvas>
+    </div>
+
+    <div class="pane" id="paneS">
+      <div class="pane-label">frequency spectrum</div>
+      <canvas id="cvS"></canvas>
+    </div>
+
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Fourier Transform</div>
+      <div class="panel-sub">DFT · Epicycle decomposition</div>
+    </div>
+    <div class="panel-body">
+
+      <div>
+        <div class="sec-label">Controls</div>
+        <div class="ctrl">
+          <label>Harmonics <span id="hv">16</span></label>
+          <input type="range" id="hSlider" min="1" max="64" value="16">
+        </div>
+        <div class="ctrl">
+          <label>Speed <span id="sv">1.0×</span></label>
+          <input type="range" id="sSlider" min="1" max="30" value="8">
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn primary" id="clearBtn">Clear</button>
+        <button class="btn" id="pauseBtn">Pause</button>
+      </div>
+
+      <div class="div-line"></div>
+
+      <div>
+        <div class="sec-label">Preset waves</div>
+        <div class="preset-row">
+          <button class="preset-btn" data-w="square">Square</button>
+          <button class="preset-btn" data-w="sawtooth">Sawtooth</button>
+          <button class="preset-btn" data-w="triangle">Triangle</button>
+          <button class="preset-btn" data-w="sine">Sine</button>
+          <button class="preset-btn" data-w="heartbeat">Heartbeat</button>
+          <button class="preset-btn" data-w="multi">Multi-sine</button>
+        </div>
+      </div>
+
+      <div class="div-line"></div>
+
+      <div>
+        <div class="sec-label">Metrics</div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">Samples</div><div class="metric-value" id="mPts">0</div></div>
+          <div class="metric"><div class="metric-label">Harmonics</div><div class="metric-value" id="mH">0</div></div>
+          <div class="metric"><div class="metric-label">DC offset</div><div class="metric-value" id="mDC">—</div></div>
+          <div class="metric"><div class="metric-label">Dominant k</div><div class="metric-value" id="mDom">—</div></div>
+        </div>
+      </div>
+
+      <div class="div-line"></div>
+
+      <div>
+        <div class="sec-label">Amplitudes</div>
+        <div class="hbars" id="hbars"></div>
+      </div>
+
+    </div>
+    <div class="panel-footer">
+      <a class="footer-link" href="mailto:ing.matteo.mi@gmail.com">email</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/matteo-ingram/" target="_blank">linkedin</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── CANVAS HELPERS ────────────────────────────────────────────────────────────
+const DPR = window.devicePixelRatio || 1;
+
+const cvD = document.getElementById('cvD');
+const cvE = document.getElementById('cvE');
+const cvS = document.getElementById('cvS');
+const cD  = cvD.getContext('2d');
+const cE  = cvE.getContext('2d');
+const cS  = cvS.getContext('2d');
+
+// Logical sizes (CSS pixels)
+let WD=0,HD=0, WE=0,HE=0, WS=0,HS=0;
+
+function sizeCanvas(cv, pane) {
+  const r = pane.getBoundingClientRect();
+  cv.style.width  = r.width  + 'px';
+  cv.style.height = r.height + 'px';
+  cv.width  = Math.round(r.width  * DPR);
+  cv.height = Math.round(r.height * DPR);
+  return { w: r.width, h: r.height };
+}
+
+function resizeAll() {
+  ({w:WD,h:HD} = sizeCanvas(cvD, document.getElementById('paneD')));
+  ({w:WE,h:HE} = sizeCanvas(cvE, document.getElementById('paneE')));
+  ({w:WS,h:HS} = sizeCanvas(cvS, document.getElementById('paneS')));
+  // Reset transforms — critical: don't accumulate scale
+  cD.setTransform(DPR,0,0,DPR,0,0);
+  cE.setTransform(DPR,0,0,DPR,0,0);
+  cS.setTransform(DPR,0,0,DPR,0,0);
+}
+
+window.addEventListener('resize', () => { resizeAll(); if(rawPts.length) recompute(); });
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let rawPts   = [];   // {x, y} in draw-canvas CSS pixels
+let dft      = [];   // sorted by amplitude: {freq, amp, phase}
+let trail    = [];   // epicycle tip trail
+let angle    = 0;    // current animation angle (0..2π)
+let paused   = false;
+let HARM     = 16;
+let SPEED    = 0.008; // radians per frame
+const TRAIL_MAX = 700;
+
+// ── DFT (O(N²), N≤128 so fast enough) ───────────────────────────────────────
+function computeDFT(ys) {
+  const N = ys.length;
+  const out = [];
+  for (let k = 0; k < N; k++) {
+    let re = 0, im = 0;
+    for (let n = 0; n < N; n++) {
+      const phi = 2 * Math.PI * k * n / N;
+      re += ys[n] * Math.cos(phi);
+      im -= ys[n] * Math.sin(phi);
+    }
+    re /= N; im /= N;
+    out.push({ freq: k, amp: Math.hypot(re, im), phase: Math.atan2(im, re) });
+  }
+  return out.sort((a, b) => b.amp - a.amp);
+}
+
+function recompute() {
+  if (rawPts.length < 4) { dft = []; trail = []; return; }
+  // Resample to 128 points uniformly along the drawn path
+  const N = 128;
+  const total = rawPts.length;
+  const ys = [];
+  for (let i = 0; i < N; i++) {
+    const idx = Math.round(i * (total - 1) / (N - 1));
+    ys.push(rawPts[idx].y - HD / 2); // centre on zero
+  }
+  dft = computeDFT(ys);
+  trail = [];
+  angle = 0;
+  updatePanel();
+  renderSpectrum();
+}
+
+// ── DRAW PANE ─────────────────────────────────────────────────────────────────
+function renderDraw() {
+  cD.clearRect(0, 0, WD, HD);
+  cD.fillStyle = '#fff';
+  cD.fillRect(0, 0, WD, HD);
+
+  // subtle grid
+  cD.strokeStyle = 'rgba(0,0,0,0.04)';
+  cD.lineWidth = 1;
+  for (let x = 0; x < WD; x += 48) { cD.beginPath(); cD.moveTo(x,0); cD.lineTo(x,HD); cD.stroke(); }
+  for (let y = 0; y < HD; y += 48) { cD.beginPath(); cD.moveTo(0,y); cD.lineTo(WD,y); cD.stroke(); }
+
+  // midline
+  cD.strokeStyle = '#f0f0f0';
+  cD.lineWidth = 1;
+  cD.beginPath(); cD.moveTo(0, HD/2); cD.lineTo(WD, HD/2); cD.stroke();
+
+  if (rawPts.length > 1) {
+    cD.strokeStyle = '#0f0f0f';
+    cD.lineWidth = 1.8;
+    cD.lineJoin = 'round';
+    cD.lineCap  = 'round';
+    cD.beginPath();
+    rawPts.forEach((p, i) => i === 0 ? cD.moveTo(p.x, p.y) : cD.lineTo(p.x, p.y));
+    cD.stroke();
+  } else {
+    cD.font = "300 12px 'DM Mono'";
+    cD.fillStyle = '#ccc';
+    cD.textAlign = 'center';
+    cD.fillText('draw any wave here', WD/2, HD/2 - 14);
+    cD.fillText('or pick a preset →', WD/2, HD/2 + 6);
+    cD.textAlign = 'left';
+  }
+}
+
+// ── EPICYCLE PANE ─────────────────────────────────────────────────────────────
+function renderEpicycles() {
+  cE.clearRect(0, 0, WE, HE);
+  cE.fillStyle = '#fff';
+  cE.fillRect(0, 0, WE, HE);
+
+  if (!dft.length) {
+    cE.font = "300 12px 'DM Mono'"; cE.fillStyle = '#ccc'; cE.textAlign = 'center';
+    cE.fillText('draw a wave to see epicycles', WE/2, HE/2);
+    cE.textAlign = 'left';
+    return;
+  }
+
+  const N = dft.length;
+  const shown = Math.min(HARM, N);
+  let x = WE / 2, y = HE / 2;
+
+  for (let i = 0; i < shown; i++) {
+    const { freq, amp, phase } = dft[i];
+    const px = x, py = y;
+    const theta = freq * angle + phase;
+    x += amp * Math.cos(theta);
+    y += amp * Math.sin(theta);
+
+    // orbit circle
+    if (amp > 1) {
+      cE.strokeStyle = 'rgba(0,0,0,0.06)';
+      cE.lineWidth = 0.5;
+      cE.beginPath(); cE.arc(px, py, amp, 0, 2*Math.PI); cE.stroke();
+    }
+
+    // arm
+    cE.strokeStyle = i === 0 ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
+    cE.lineWidth   = i === 0 ? 1.2 : 0.7;
+    cE.beginPath(); cE.moveTo(px, py); cE.lineTo(x, y); cE.stroke();
+  }
+
+  // tip
+  cE.fillStyle = '#e63946';
+  cE.beginPath(); cE.arc(x, y, 3.5, 0, 2*Math.PI); cE.fill();
+
+  // trail
+  trail.push([x, y]);
+  if (trail.length > TRAIL_MAX) trail.shift();
+
+  if (trail.length > 1) {
+    for (let i = 1; i < trail.length; i++) {
+      const a = Math.pow(i / trail.length, 1.3) * 0.85;
+      cE.strokeStyle = `rgba(69,123,157,${a})`;
+      cE.lineWidth = 1.3;
+      cE.beginPath();
+      cE.moveTo(trail[i-1][0], trail[i-1][1]);
+      cE.lineTo(trail[i][0],   trail[i][1]);
+      cE.stroke();
+    }
+  }
+}
+
+// ── SPECTRUM PANE ─────────────────────────────────────────────────────────────
+function renderSpectrum() {
+  cS.clearRect(0, 0, WS, HS);
+  cS.fillStyle = '#fff'; cS.fillRect(0, 0, WS, HS);
+
+  if (!dft.length) {
+    cS.font = "300 11px 'DM Mono'"; cS.fillStyle = '#ccc'; cS.textAlign = 'center';
+    cS.fillText('spectrum appears here', WS/2, HS/2);
+    cS.textAlign = 'left'; return;
+  }
+
+  const shown  = Math.min(HARM, dft.length);
+  const byFreq = dft.slice(0, shown).slice().sort((a, b) => a.freq - b.freq);
+  const maxAmp = Math.max(...byFreq.map(d => d.amp), 1);
+  const pL=24, pB=20, pT=8;
+  const plotW = WS - pL - 8;
+  const plotH = HS - pT - pB;
+  const barW  = Math.max(2, plotW / byFreq.length);
+
+  cS.strokeStyle = '#ececec'; cS.lineWidth = 0.5;
+  cS.beginPath(); cS.moveTo(pL, pT); cS.lineTo(pL, HS-pB); cS.lineTo(WS-4, HS-pB); cS.stroke();
+
+  byFreq.forEach((d, i) => {
+    const bh = (d.amp / maxAmp) * plotH;
+    const bx = pL + i * barW;
+    const by = HS - pB - bh;
+    const hue = 200 + (i / byFreq.length) * 120;
+    cS.fillStyle = `hsl(${hue},55%,55%)`;
+    cS.fillRect(bx + 0.5, by, Math.max(barW - 1, 1), bh);
+
+    if (i % Math.max(1, Math.floor(byFreq.length / 7)) === 0) {
+      cS.font = "8px 'DM Mono'"; cS.fillStyle = '#bbb'; cS.textAlign = 'center';
+      cS.fillText(d.freq, bx + barW/2, HS - pB + 12);
+    }
+  });
+
+  cS.font = "8px 'DM Mono'"; cS.fillStyle = '#bbb'; cS.textAlign = 'left';
+  cS.fillText('k', WS-12, HS-pB+12);
+}
+
+// ── PANEL METRICS ─────────────────────────────────────────────────────────────
+function updatePanel() {
+  document.getElementById('mPts').textContent = rawPts.length;
+  document.getElementById('mH').textContent   = Math.min(HARM, dft.length);
+
+  if (dft.length) {
+    const dc  = dft.find(d => d.freq === 0);
+    const dom = dft.filter(d => d.freq > 0)[0];
+    document.getElementById('mDC').textContent  = dc  ? dc.amp.toFixed(1)  : '—';
+    document.getElementById('mDom').textContent = dom ? 'k=' + dom.freq    : '—';
+  }
+
+  const el = document.getElementById('hbars');
+  el.innerHTML = '';
+  const n    = Math.min(10, HARM, dft.length);
+  const maxA = dft.length ? dft[0].amp : 1;
+  for (let i = 0; i < n; i++) {
+    const d   = dft[i];
+    const pct = Math.round(d.amp / maxA * 100);
+    const hue = 200 + (i / n) * 120;
+    const row = document.createElement('div');
+    row.className = 'hbar';
+    row.innerHTML =
+      '<span>k' + d.freq + '</span>' +
+      '<div class="hbar-track"><div class="hbar-fill" style="width:' + pct + '%;background:hsl(' + hue + ',55%,55%)"></div></div>' +
+      '<span class="hbar-val">' + d.amp.toFixed(1) + '</span>';
+    el.appendChild(row);
+  }
+}
+
+// ── PRESET WAVES ─────────────────────────────────────────────────────────────
+const PRESETS = {
+  square:    (x,W,H) => (Math.floor(x/(W/2))%2===0?1:-1)*H*0.36,
+  sawtooth:  (x,W,H) => ((x%(W/2))/(W/2)*2-1)*H*0.36,
+  triangle:  (x,W,H) => { const t=(x%(W/2))/(W/2); return (t<0.5?4*t-1:3-4*t)*H*0.36; },
+  sine:      (x,W,H) => Math.sin(x/W*4*Math.PI)*H*0.36,
+  heartbeat: (x,W,H) => {
+    const t=x/W;
+    const s=t>0.1&&t<0.16?Math.sin((t-0.1)/0.06*Math.PI)*0.95:t>0.16&&t<0.25?-Math.sin((t-0.16)/0.09*Math.PI)*0.35:0;
+    return -(s+0.05*Math.sin(t*8*Math.PI))*H*0.42;
+  },
+  multi:     (x,W,H) => (Math.sin(x/W*2*Math.PI)+0.5*Math.sin(x/W*6*Math.PI)+0.25*Math.sin(x/W*10*Math.PI))*H*0.28
+};
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    rawPts = [];
+    for (let x = 0; x <= WD; x += 3) rawPts.push({ x, y: HD/2 + PRESETS[btn.dataset.w](x, WD, HD) });
+    renderDraw();
+    recompute();
+  });
+});
+
+// ── DRAWING INTERACTION ───────────────────────────────────────────────────────
+let drawing = false;
+
+function ptFromEvent(e) {
+  const r = cvD.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - r.left, y: src.clientY - r.top };
+}
+
+cvD.addEventListener('mousedown',  e => { drawing=true; rawPts=[]; rawPts.push(ptFromEvent(e)); });
+cvD.addEventListener('mousemove',  e => { if(!drawing) return; rawPts.push(ptFromEvent(e)); renderDraw(); });
+cvD.addEventListener('mouseup',    () => { if(drawing){ drawing=false; recompute(); } });
+cvD.addEventListener('mouseleave', () => { if(drawing){ drawing=false; recompute(); } });
+
+cvD.addEventListener('touchstart', e => { e.preventDefault(); cvD.dispatchEvent(new MouseEvent('mousedown',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY})); },{passive:false});
+cvD.addEventListener('touchmove',  e => { e.preventDefault(); cvD.dispatchEvent(new MouseEvent('mousemove', {clientX:e.touches[0].clientX,clientY:e.touches[0].clientY})); },{passive:false});
+cvD.addEventListener('touchend',   e => { e.preventDefault(); cvD.dispatchEvent(new MouseEvent('mouseup', {})); },{passive:false});
+
+// ── CONTROLS ─────────────────────────────────────────────────────────────────
+document.getElementById('hSlider').addEventListener('input', function() {
+  HARM = +this.value;
+  document.getElementById('hv').textContent = this.value;
+  trail = [];
+  updatePanel();
+  renderSpectrum();
+});
+
+document.getElementById('sSlider').addEventListener('input', function() {
+  SPEED = this.value * 0.0006 * Math.PI;
+  document.getElementById('sv').textContent = (+this.value / 8).toFixed(1) + '×';
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  rawPts=[]; dft=[]; trail=[]; angle=0;
+  renderDraw();
+  cE.clearRect(0,0,WE,HE); cE.fillStyle='#fff'; cE.fillRect(0,0,WE,HE);
+  cS.clearRect(0,0,WS,HS); cS.fillStyle='#fff'; cS.fillRect(0,0,WS,HS);
+  updatePanel();
+});
+
+document.getElementById('pauseBtn').addEventListener('click', function() {
+  paused = !paused;
+  this.textContent = paused ? 'Resume' : 'Pause';
+});
+
+// ── MAIN LOOP ─────────────────────────────────────────────────────────────────
+function loop() {
+  if (!paused && dft.length) {
+    angle += SPEED;
+    if (angle > 2*Math.PI) angle -= 2*Math.PI;
+    renderEpicycles();
+  }
+  requestAnimationFrame(loop);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  resizeAll();
+  renderDraw();
+  // auto-load square wave preset
+  for (let x = 0; x <= WD; x += 3) rawPts.push({ x, y: HD/2 + PRESETS.square(x, WD, HD) });
+  renderDraw();
+  recompute();
+  loop();
+}
+
+setTimeout(init, 100);
+</script>
+</body>
+</html>
