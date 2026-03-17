@@ -1,453 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ingram Capital | Investment Management & Hedge Fund</title>
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <!-- Custom CSS -->
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #F5F5F5;
-      color: #333;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Libre Baskerville', serif;
-      font-weight: bold;
-    }
-      
-    .navbar {
-      background-color: #00274D;
-    }
-    .navbar-brand {
-      font-size: 1.5rem;
-      font-weight: bold;
-      font-family: 'Libre Baskerville', serif;
-      color: #FFFFFF !important;
-    }
-    .nav-link {
-      color: #FFFFFF !important;
-    }
-    .nav-link:hover {
-      color: #FFC857 !important;
-    }
-    .hero-section {
-      background: linear-gradient(rgba(0, 39, 77, 0.8), rgba(0, 39, 77, 0.8)), url('LondonBG.jpg');
-      background-size: cover;
-      background-position: center;
-      color: #FFFFFF;
-      height: 100vh;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .hero-section h1 {
-      font-size: 3.5rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    .hero-section p {
-      font-size: 1.25rem;
-      margin-top: 20px;
-      margin-bottom: 40px;
-    }
-    .hero-section .btn {
-      font-size: 1rem;
-      padding: 10px 30px;
-      background-color: #FFC857;
-      color: #00274D;
-      border: none;
-    }
-    .hero-section .btn:hover {
-      background-color: #FFFFFF;
-      color: #00274D;
-    }
-    .section-title {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #00274D;
-      margin-bottom: 40px;
-    }
-    .service-card {
-      background-color: #FFFFFF;
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      margin-bottom: 20px;
-      transition: transform 0.3s ease;
-      position: relative;
-    }
-    .service-card:hover {
-      transform: translateY(-10px);
-    }
-    .service-card h3 {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #00274D;
-    }
-    .footer {
-      background-color: #00274D;
-      padding: 60px 0 30px;
-      position: relative;
-    }
-    .footer h5 {
-      color: #FFC857;
-      font-size: 1.1rem;
-      letter-spacing: 1px;
-    }
-    .footer a {
-      transition: all 0.3s ease;
-    }
-    .footer a:hover {
-      color: #FFC857 !important;
-      text-decoration: none;
-    }
-    .back-to-top {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: none;
-      z-index: 1000;
-      background-color: #FFC857;
-      color: #00274D;
-      border: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    .back-to-top:hover {
-      background-color: #fff;
-      transform: translateY(-3px);
-    }
-    .service-card {
-      background-color: #FFFFFF;
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      margin-bottom: 20px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      color: black;
-    }
-    .service-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-    .service-card h3 {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #00274D;
-    }
-    .service-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 200, 87, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-    .service-card:hover::before {
-      left: 100%;
-    }
-    
-    .stock-market-section {
-      background-color: #fff;
-      padding: 50px 0;
-    }
-    
-    .performance-section {
-      background-color: #00274D;
-      color: white;
-      padding: 60px 0;
-    }
-    
-    .stat-number {
-      font-size: 3rem;
-      font-weight: bold;
-      color: #FFC857;
-    }
-    
-    .stat-label {
-      font-size: 1.2rem;
-      margin-top: 10px;
-    }
-    
-    .investment-strategy {
-      padding: 60px 0;
-      background-color: #f8f9fa;
-    }
-    
-    .strategy-card {
-      border-left: 4px solid #FFC857;
-      padding-left: 20px;
-      margin-bottom: 30px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matteo Martin Ingram</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #0f0f0f;
+  --ink2:   #999;
+  --ink3:   #ccc;
+  --border: #ececec;
+  --white:  #fff;
+}
+
+html, body {
+  height: 100vh;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.stage {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.stage.pushed { transform: translateX(340px); }
+
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.45;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.name-wrap {
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 48px;
+}
+
+.name {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(26px, 4.5vw, 56px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  transition: opacity 0.2s;
+}
+
+.name:hover { opacity: 0.45; }
+
+.name-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--ink3);
+  letter-spacing: 0.12em;
+  margin-top: 20px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.35s 0.15s, transform 0.35s 0.15s;
+}
+
+.name-wrap:hover .name-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 340px;
+  height: 100vh;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  transform: translateX(-100%);
+  transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.sidebar.open { transform: translateX(0); }
+
+.sidebar-header {
+  padding: 40px 36px 32px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-initials {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink2);
+  letter-spacing: 0.06em;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink3);
+  font-size: 16px;
+  line-height: 1;
+  font-family: 'DM Mono', monospace;
+  transition: color 0.15s;
+  padding: 4px;
+}
+.close-btn:hover { color: var(--ink); }
+
+.nav-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0 32px;
+}
+
+.nav-list::-webkit-scrollbar { width: 0; }
+
+.nav-section { padding: 28px 36px 0; }
+
+.nav-section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--ink3);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  gap: 12px;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s, transform 0.3s, color 0.15s;
+}
+
+.sidebar.open .nav-item { opacity: 1; transform: translateX(0); }
+.sidebar.open .nav-item:nth-child(1) { transition-delay: 0.07s; }
+.sidebar.open .nav-item:nth-child(2) { transition-delay: 0.12s; }
+.sidebar.open .nav-item:nth-child(3) { transition-delay: 0.17s; }
+.sidebar.open .nav-item:nth-child(4) { transition-delay: 0.22s; }
+.sidebar.open .nav-item:nth-child(5) { transition-delay: 0.27s; }
+.sidebar.open .nav-item:nth-child(6) { transition-delay: 0.32s; }
+
+.nav-item:last-child { border-bottom: none; }
+.nav-item:hover { opacity: 0.4; }
+
+.nav-item-title {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.nav-item-arrow {
+  font-size: 12px;
+  color: var(--ink3);
+  font-family: 'DM Mono', monospace;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.nav-item:hover .nav-item-arrow { transform: translateX(2px); }
+
+.sidebar-footer {
+  padding: 20px 36px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  gap: 22px;
+}
+
+.footer-link {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--ink3);
+  text-decoration: none;
+  letter-spacing: 0.07em;
+  transition: color 0.15s;
+}
+.footer-link:hover { color: var(--ink); }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+.overlay.active { pointer-events: auto; }
+
+.year {
+  position: fixed;
+  bottom: 28px;
+  right: 32px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  z-index: 2;
+  transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+}
+.year.pushed { transform: translateX(340px); }
+</style>
 </head>
 <body>
 
- <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container">
-    <a class="navbar-brand" href="index.html">Ingram Capital</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <!-- Dropdown for Tools -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Tools
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="page2.html">CEM</a></li>
-            <li><a class="dropdown-item" href="page1.html">Research</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#about">About Us</a>
-        </li>
-      </ul>
-    </div>
+<div class="overlay" id="overlay"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-initials">MMI</div>
+    <button class="close-btn" id="closeBtn" aria-label="close">&#x2715;</button>
   </div>
-</nav>
 
+  <div class="nav-list">
 
-  <!-- Hero Section -->
-  <section id="home" class="hero-section">
-    <div class="container">
-      <h1>Strategic Investment Management</h1>
-      <p>At Ingram Capital, we combine fundamental analysis with quantitative models to invest in under-valued companies.</p>
-      <a href="#strategies" class="btn btn-lg">Our Investment Approach</a>
-    </div>
-  </section>
+    <div class="nav-section">
+      <div class="nav-section-label">Simulation</div>
 
-  <!-- Investment Strategies Section -->
-  <section id="strategies" class="investment-strategy">
-    <div class="container">
-      <h2 class="section-title text-center">Our Investment Strategies</h2>
-      <div class="row">
-        <div class="col-md-6">
-          <div class="strategy-card">
-            <h3>Long/Short Equity</h3>
-            <p>Our flagship strategy combines deep fundamental research with quantitative screening to identify mispriced securities across global markets. We maintain a disciplined approach to both long and short positions, focusing on companies with strong valuation metrics and identifiable catalysts.</p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="strategy-card">
-            <h3>Quantitative Value</h3>
-            <p>Leveraging proprietary algorithms and machine learning models, we systematically identify undervalued securities with strong balance sheets and improving fundamentals. Our quantitative approach allows us to efficiently scan thousands of securities across multiple markets.</p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="strategy-card">
-            <h3>Event-Driven</h3>
-            <p>We capitalize on corporate events such as mergers, spin-offs, restructurings, and other special situations where pricing inefficiencies often emerge. Our team's experience in corporate finance and legal analysis gives us an edge in assessing event outcomes.</p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="strategy-card">
-            <h3>Sustainable Growth</h3>
-            <p>Focusing on companies driving innovation in renewable energy, clean technology, and sustainable infrastructure. We combine traditional financial analysis with ESG metrics to identify leaders in the transition to a low-carbon economy.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Performance Section -->
-  <section id="performance" class="performance-section">
-    <div class="container">
-      <h2 class="section-title text-center text-white">Investment Performance</h2>
-      <div class="row text-center">
-        <div class="col-md-3">
-          <div class="stat-number">29.7%</div>
-          <div class="stat-label">Annualized Return</div>
-          <p class="text-white-50 mt-2">Since inception</p>
-        </div>
-        <div class="col-md-3">
-          <div class="stat-number">2.4</div>
-          <div class="stat-label">Sharpe Ratio</div>
-          <p class="text-white-50 mt-2">1-year average</p>
-        </div>
-        <div class="col-md-3">
-          <div class="stat-number">N/A</div>
-          <div class="stat-label">Assets Under Management</div>
-          <p class="text-white-50 mt-2">As of current quarter</p>
-        </div>
-        <div class="col-md-3">
-          <div class="stat-number">2%</div>
-          <div class="stat-label">Annual Volatility</div>
-          <p class="text-white-50 mt-2">1-year average</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Stock Market Live Updates -->
-  <section id="market" class="stock-market-section">
-    <div class="container">
-      <h2 class="section-title text-center">Live Market Performance</h2>
-      <div class="tradingview-widget-container">
-        <div id="tradingview-widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js">
-          {
-            "colorTheme": "light",
-            "dateRange": "12M",
-            "showChart": true,
-            "locale": "en",
-            "isTransparent": false,
-            "showSymbolLogo": true,
-            "tabs": [
-              {
-                "title": "Indices",
-                "symbols": [
-                  { "s": "OANDA:SPX500USD", "d": "S&P 500" },
-                  { "s": "OANDA:NAS100USD", "d": "NASDAQ 100" },
-                  { "s": "FOREXCOM:DJI", "d": "Dow Jones" }
-                ]
-              },
-              {
-                "title": "Commodities",
-                "symbols": [
-                  { "s": "TVC:GOLD", "d": "Gold" },
-                  { "s": "TVC:SILVER", "d": "Silver" },
-                  { "s": "NYMEX:CL1!", "d": "Crude Oil" }
-                ]
-              },
-              {
-                "title": "Forex",
-                "symbols": [
-                  { "s": "FX:EURUSD", "d": "EUR/USD" },
-                  { "s": "FX:GBPUSD", "d": "GBP/USD" },
-                  { "s": "FX:USDJPY", "d": "USD/JPY" }
-                ]
-              }
-            ]
-          }
-        </script>
-      </div>
-    </div>
-  </section>
-
-  <!-- About Us Section -->
-  <section id="about" class="bg-light py-5">
-    <div class="container">
-      <h2 class="section-title text-center">About Ingram Capital</h2>
-      <div class="row">
-        <div class="col-md-6">
-          <p>Founded with the vision of delivering superior risk-adjusted returns through disciplined investment strategies, Ingram Capital has grown into a respected investment management firm serving institutional and high-net-worth investors.</p>
-          <p>Our team combines decades of experience across hedge funds, investment banks, and asset management firms. We bring together fundamental research, quantitative analysis, and rigorous risk management to identify investment opportunities others may overlook.</p>
-        </div>
-        <div class="col-md-6">
-          <p>We operate with a performance-driven culture that emphasizes transparency, accountability, and alignment of interests with our investors. Our investment professionals are significant investors in our funds, ensuring our interests are fully aligned with those of our clients.</p>
-          <p>Our approach is rooted in deep fundamental analysis, complemented by proprietary quantitative models that help us identify valuation anomalies and emerging trends across global markets.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="row g-4">
-        <!-- Company Info -->
-        <div class="col-md-4 text-center text-md-start">
-          <h5 class="mb-3">Ingram Capital</h5>
-          <p class="small">Delivering superior risk-adjusted returns through disciplined investment strategies.</p>
-          <div class="mt-3">
-            <a href="mailto:investor.relations@ingramcapital.com" class="d-block text-white-50 small">
-              <i class="fas fa-envelope me-2"></i>ing.matteo.bs@gmail.com
-            </a>
-          </div>
-        </div>
-
-        <!-- Quick Links -->
-        <div class="col-md-4 text-center">
-          <h5 class="mb-3">Quick Links</h5>
-          <ul class="list-unstyled">
-            <li class="mb-2"><a href="#home" class="text-white-50">Home</a></li>
-            <li class="mb-2"><a href="#strategies" class="text-white-50">Investment Strategies</a></li>
-            <li class="mb-2"><a href="#performance" class="text-white-50">Performance</a></li>
-            <li class="mb-2"><a href="#about" class="text-white-50">About Us</a></li>
-          </ul>
-        </div>
-
-        <!-- Social Media -->
-        <div class="col-md-4 text-center text-md-end">
-          <h5 class="mb-3">Connect With Us</h5>
-          <div class="social-links">
-            <a href="https://www.linkedin.com/in/matteo-ingram/" target="_blank" class="text-white-50 me-3">
-              <i class="fab fa-linkedin fa-lg"></i>
-            </a>
-            <a href="https://x.com/matteooffical" target="_blank" class="text-white-50 me-3">
-              <i class="fab fa-twitter fa-lg"></i>
-            </a>
-          </div>
-          <div class="mt-4">
-            <a href="#" class="btn btn-outline-light btn-sm">Investor Login</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Copyright -->
-      <div class="row mt-5">
-        <div class="col-12 text-center">
-          <hr class="mb-4 opacity-25">
-          <p class="small mb-0 text-white-50">
-            &copy; 2025 Ingram Capital Management. All rights reserved.<br>
-            <a href="#" class="text-white-50">Privacy Policy</a> | 
-            <a href="#" class="text-white-50">Terms of Service</a> | 
-            <a href="#" class="text-white-50">Disclosures</a>
-          </p>
-        </div>
-      </div>
-
-      <!-- Back to Top -->
-      <a href="#home" class="btn btn-primary back-to-top">
-        <i class="fas fa-arrow-up"></i>
+      <a class="nav-item" href="page1.html">
+        <div class="nav-item-title">Double Pendulum</div>
+        <div class="nav-item-arrow">&#x2192;</div>
       </a>
+
+      <a class="nav-item" href="page2.html">
+        <div class="nav-item-title">Polymarket Hedging</div>
+        <div class="nav-item-arrow">&#x2192;</div>
+      </a>
+
     </div>
-  </footer>
 
-  <!-- Bootstrap 5 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- Back to Top Script -->
-  <script>
-    // Show/hide back to top button
-    window.addEventListener('scroll', function() {
-      const backToTop = document.querySelector('.back-to-top');
-      if (window.pageYOffset > 300) {
-        backToTop.style.display = 'block';
-      } else {
-        backToTop.style.display = 'none';
-      }
-    });
+    <div class="nav-section" style="margin-top: 4px;">
+      <div class="nav-section-label">Other</div>
 
-    // Smooth scroll for all navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      });
-    });
-  </script>
+      <a class="nav-item" href="#">
+        <div class="nav-item-title">Coming soon</div>
+        <div class="nav-item-arrow">&#x2192;</div>
+      </a>
+
+    </div>
+
+  </div>
+
+  <div class="sidebar-footer">
+    <a class="footer-link" href="mailto:ing.matteo.mi@gmail.com">email</a>
+    <a class="footer-link" href="https://www.linkedin.com/in/matteo-ingram/">linkedin</a>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="name-wrap" id="nameBtn" role="button" tabindex="0" aria-label="Open navigation">
+    <div class="name">Matteo Martin Ingram</div>
+    <div class="name-hint">click to explore</div>
+  </div>
+</div>
+
+<div class="year" id="year">2026</div>
+
+<script>
+const sidebar  = document.getElementById('sidebar');
+const stage    = document.getElementById('stage');
+const yearEl   = document.getElementById('year');
+const overlay  = document.getElementById('overlay');
+const nameBtn  = document.getElementById('nameBtn');
+const closeBtn = document.getElementById('closeBtn');
+let open = false;
+
+function openSidebar() {
+  open = true;
+  sidebar.classList.add('open');
+  stage.classList.add('pushed');
+  yearEl.classList.add('pushed');
+  overlay.classList.add('active');
+}
+
+function closeSidebar() {
+  open = false;
+  sidebar.classList.remove('open');
+  stage.classList.remove('pushed');
+  yearEl.classList.remove('pushed');
+  overlay.classList.remove('active');
+}
+
+nameBtn.addEventListener('click', () => open ? closeSidebar() : openSidebar());
+nameBtn.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open ? closeSidebar() : openSidebar(); }
+});
+closeBtn.addEventListener('click', closeSidebar);
+overlay.addEventListener('click', closeSidebar);
+</script>
 </body>
 </html>
