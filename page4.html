@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar System — Matteo Martin Ingram</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #0f0f0f;
+  --ink2:   #999;
+  --ink3:   #ccc;
+  --border: #ececec;
+  --white:  #fff;
+}
+
+html, body {
+  height: 100vh;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── top bar ── */
+.bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+  z-index: 50;
+}
+.bar-back {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: 300;
+  letter-spacing: 0.1em; color: var(--ink3);
+  text-decoration: none; transition: color 0.15s;
+}
+.bar-back:hover { color: var(--ink); }
+.bar-title {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 15px; font-weight: 400;
+  letter-spacing: 0.04em; color: var(--ink2);
+}
+.bar-year {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: 300;
+  color: var(--ink3); letter-spacing: 0.08em;
+}
+
+/* ── layout ── */
+.layout {
+  display: flex;
+  height: 100vh;
+  padding-top: 56px;
+}
+
+/* ── canvas area ── */
+.cv-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  /* subtle grid matching index */
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+#sol { display: block; width: 100%; height: 100%; }
+
+.hud-bottom {
+  position: absolute; bottom: 20px; left: 24px;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.1em;
+  color: var(--ink3); line-height: 2; pointer-events: none;
+}
+.hud-hover { color: var(--ink2); }
+
+/* ── right panel ── */
+.panel {
+  width: 300px; flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.prow {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.plabel {
+  font-size: 9px; font-weight: 300;
+  letter-spacing: 0.16em; color: var(--ink3);
+  text-transform: uppercase; margin-bottom: 10px;
+}
+
+/* live badge */
+.live-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 300; letter-spacing: 0.06em; color: var(--ink2);
+}
+.livdot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink); animation: bl 2.2s ease-in-out infinite;
+}
+@keyframes bl { 0%,100%{opacity:1} 50%{opacity:0.12} }
+.livdot.paused { animation: none; opacity: 0.2; }
+
+/* date */
+.date-big {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 18px; font-weight: 400; color: var(--ink);
+  letter-spacing: 0.01em; margin-bottom: 3px;
+}
+.date-sub {
+  font-size: 9px; font-weight: 300; letter-spacing: 0.12em;
+  color: var(--ink3); text-transform: uppercase;
+}
+
+/* mode toggle */
+.mode-row { display: flex; }
+.mode-btn {
+  flex: 1; background: none;
+  border: 1px solid var(--border);
+  color: var(--ink3);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 8px 0;
+  cursor: pointer; transition: all 0.15s;
+}
+.mode-btn:first-child { border-radius: 2px 0 0 2px; }
+.mode-btn:last-child  { border-radius: 0 2px 2px 0; border-left: none; }
+.mode-btn.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
+/* sim controls */
+.sim-block { display: flex; flex-direction: column; gap: 10px; }
+.ctrl-row { display: flex; gap: 6px; }
+.btn {
+  flex: 1; background: none;
+  border: 1px solid var(--border);
+  color: var(--ink2);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 0;
+  cursor: pointer; border-radius: 2px; transition: all 0.15s;
+}
+.btn:hover { border-color: var(--ink2); color: var(--ink); }
+.btn.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.sl-row { display: flex; align-items: center; gap: 10px; }
+.sl-label { font-size: 9px; font-weight: 300; letter-spacing: 0.1em; color: var(--ink3); white-space: nowrap; }
+input[type=range] {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 1px; background: var(--border); outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 9px; height: 9px;
+  background: var(--ink); border-radius: 50%;
+}
+.sl-val { font-size: 9px; font-weight: 300; color: var(--ink2); min-width: 40px; text-align: right; }
+.sim-date-txt {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px; color: var(--ink2);
+}
+
+/* display toggles */
+.tog-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* planet list */
+.plist {
+  flex: 1; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.plist::-webkit-scrollbar { width: 3px; }
+.plist::-webkit-scrollbar-thumb { background: var(--border); }
+
+.pitem {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  cursor: default; transition: background 0.12s;
+}
+.pitem:hover, .pitem.hl { background: #f9f9f9; }
+.pitem.hl .pname { color: var(--ink); }
+.pdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pinfo { flex: 1; }
+.pname {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 15px; font-weight: 400; color: var(--ink2);
+  letter-spacing: 0.02em; margin-bottom: 1px;
+}
+.psub { font-size: 9px; font-weight: 300; letter-spacing: 0.08em; color: var(--ink3); }
+.pangle {
+  font-size: 9px; font-weight: 300; letter-spacing: 0.06em;
+  color: var(--ink3); font-variant-numeric: tabular-nums; text-align: right;
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <a class="bar-back" href="index.html">Matteo Martin Ingram</a>
+  <span class="bar-title">Solar System</span>
+  <span class="bar-year">2026</span>
+</div>
+
+<div class="layout">
+  <div class="cv-area" id="cva">
+    <canvas id="sol"></canvas>
+    <div class="hud-bottom">
+      <div>scroll · zoom &nbsp;&nbsp; drag · pan</div>
+      <div class="hud-hover" id="hudH"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+
+    <div class="prow">
+      <div class="plabel">status</div>
+      <div class="live-row">
+        <div class="livdot" id="ldot"></div>
+        <span id="ltxt">live</span>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">date</div>
+      <div class="date-big" id="dateBig">—</div>
+      <div class="date-sub" id="dateSub">UTC</div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">mode</div>
+      <div class="mode-row">
+        <button class="mode-btn on" id="mLive" onclick="setMode('live')">live</button>
+        <button class="mode-btn"    id="mSim"  onclick="setMode('sim')">simulate</button>
+      </div>
+    </div>
+
+    <div class="prow" id="simPanel" style="display:none">
+      <div class="plabel">simulation</div>
+      <div class="sim-block">
+        <div class="ctrl-row">
+          <button class="btn" id="btnPlay" onclick="togglePlay()">▶ play</button>
+          <button class="btn" onclick="resetSim()">↺ reset</button>
+        </div>
+        <div class="sl-row">
+          <span class="sl-label">speed</span>
+          <input type="range" id="spdR" min="0" max="7" step="1" value="3" oninput="onSpd(this)"/>
+          <span class="sl-val" id="spdV">1 yr/s</span>
+        </div>
+        <div class="sim-date-txt" id="simDateTxt">—</div>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">display</div>
+      <div class="tog-row">
+        <button class="btn on" id="btnT" onclick="togT()" style="flex:none;padding:8px 12px">trails</button>
+        <button class="btn on" id="btnL" onclick="togL()" style="flex:none;padding:8px 12px">labels</button>
+        <button class="btn on" id="btnO" onclick="togO()" style="flex:none;padding:8px 12px">orbits</button>
+        <button class="btn"    id="btnR" onclick="resetView()" style="flex:none;padding:8px 12px">reset view</button>
+      </div>
+    </div>
+
+    <div class="plist" id="plist"></div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ORBITAL ELEMENTS — J2000.0 epoch (Meeus, Astronomical Algorithms Ch.31)
+// Positions computed via Kepler's equation → true heliocentric XY (AU)
+// Angular velocities are real: Mercury ~4.09°/day, Neptune ~0.006°/day
+// ═══════════════════════════════════════════════════════════
+const PLANETS = [
+  { name:'Mercury', col:'#888888', vr:3.5,
+    a:0.38710, e:0.20563, w0: 77.4561, wdot:0.15887,
+    M0:174.7948, Mdot:149472.5153557,
+    periodDays:87.97,  speedDegDay:4.0923,
+    dist:'57.9M km',  moons:0,  diam:'4,880 km' },
+  { name:'Venus',   col:'#c8a050', vr:4.8,
+    a:0.72333, e:0.00677, w0:131.5637, wdot:0.00487,
+    M0: 50.4161, Mdot: 58517.8156760,
+    periodDays:224.70, speedDegDay:1.6021,
+    dist:'108.2M km', moons:0,  diam:'12,104 km' },
+  { name:'Earth',   col:'#4a7fc1', vr:5.2,
+    a:1.00000, e:0.01671, w0:102.9373, wdot:0.32256,
+    M0:357.5291, Mdot: 35999.0503,
+    periodDays:365.25, speedDegDay:0.9856,
+    dist:'149.6M km', moons:1,  diam:'12,742 km' },
+  { name:'Mars',    col:'#b04030', vr:4.0,
+    a:1.52368, e:0.09341, w0:336.0602, wdot:0.44381,
+    M0: 19.3730, Mdot: 19140.3030,
+    periodDays:686.97, speedDegDay:0.5240,
+    dist:'227.9M km', moons:2,  diam:'6,779 km' },
+  { name:'Jupiter', col:'#c0854a', vr:11,
+    a:5.20260, e:0.04849, w0: 14.3313, wdot:0.21555,
+    M0: 20.0202, Mdot:  3034.7469,
+    periodDays:4332.6, speedDegDay:0.0831,
+    dist:'778.5M km', moons:95, diam:'139,820 km' },
+  { name:'Saturn',  col:'#b0a060', vr:9.5,
+    a:9.55491, e:0.05551, w0: 93.0568, wdot:0.56655,
+    M0:317.0207, Mdot:  1221.5515,
+    periodDays:10759.2,speedDegDay:0.0335,
+    dist:'1.43B km',  moons:146,diam:'116,460 km' },
+  { name:'Uranus',  col:'#70b0b0', vr:7.5,
+    a:19.21845,e:0.04630, w0:173.0052, wdot:0.08932,
+    M0:141.0498, Mdot:   428.4775,
+    periodDays:30688.5,speedDegDay:0.01176,
+    dist:'2.87B km',  moons:28, diam:'50,724 km' },
+  { name:'Neptune', col:'#4060b0', vr:7,
+    a:30.11039,e:0.00899, w0: 48.1203, wdot:0.03072,
+    M0:256.2280, Mdot:   218.4580,
+    periodDays:60182.0,speedDegDay:0.00598,
+    dist:'4.50B km',  moons:16, diam:'49,244 km' },
+];
+
+// ─── Kepler solver ───────────────────────────────────────────
+function keplerE(M, e) {
+  let E = M;
+  for (let i = 0; i < 12; i++) E = M + e * Math.sin(E);
+  return E;
+}
+
+// Returns heliocentric ecliptic XY (AU) for a given JDE
+function planetXY(p, JDE) {
+  const T    = (JDE - 2451545.0) / 36525.0;
+  const Mdeg = ((p.M0 + p.Mdot * T) % 360 + 360) % 360;
+  const Mrad = Mdeg * Math.PI / 180;
+  const E    = keplerE(Mrad, p.e);
+  const nu   = 2 * Math.atan2(
+    Math.sqrt(1 + p.e) * Math.sin(E / 2),
+    Math.sqrt(1 - p.e) * Math.cos(E / 2)
+  );
+  const r  = p.a * (1 - p.e * Math.cos(E));
+  const w  = (p.w0 + p.wdot * T) * Math.PI / 180;
+  return { x: r * Math.cos(nu + w), y: r * Math.sin(nu + w), r,
+           lon: ((nu + w) * 180 / Math.PI + 360) % 360 };
+}
+
+// ─── Time helpers ────────────────────────────────────────────
+function jdn(y, mo, d, h=0, m=0, s=0) {
+  const T = d + h/24 + m/1440 + s/86400;
+  if (mo <= 2) { y--; mo += 12; }
+  const A = Math.floor(y/100), B = 2 - A + Math.floor(A/4);
+  return Math.floor(365.25*(y+4716)) + Math.floor(30.6001*(mo+1)) + T + B - 1524.5;
+}
+
+// High-precision now: includes milliseconds
+function nowJDE() {
+  const n = new Date();
+  return jdn(n.getUTCFullYear(), n.getUTCMonth()+1, n.getUTCDate(),
+             n.getUTCHours(), n.getUTCMinutes(),
+             n.getUTCSeconds() + n.getUTCMilliseconds()/1000);
+}
+
+function jdeToDate(JDE) {
+  let JD = JDE + 0.5, Z = Math.floor(JD), F = JD - Z, A = Z;
+  if (Z >= 2299161) { const a = Math.floor((Z-1867216.25)/36524.25); A = Z+1+a-Math.floor(a/4); }
+  const B=A+1524, C=Math.floor((B-122.1)/365.25), D=Math.floor(365.25*C), E=Math.floor((B-D)/30.6001);
+  const day=B-D-Math.floor(30.6001*E), month=E<14?E-1:E-13, year=month>2?C-4716:C-4715;
+  let frac=F;
+  const hh=Math.floor(frac*24); frac=frac*24-hh;
+  const mm=Math.floor(frac*60); frac=frac*60-mm;
+  const ss=Math.floor(frac*60);
+  return { year, month, day, h:hh, m:mm, s:ss };
+}
+
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtFull(d)  { return `${d.day} ${MN[d.month-1]} ${d.year}  ${String(d.h).padStart(2,'0')}:${String(d.m).padStart(2,'0')}:${String(d.s).padStart(2,'0')}`; }
+function fmtShort(d) { return `${d.day} ${MN[d.month-1]} ${d.year}`; }
+
+// ─── Canvas setup ────────────────────────────────────────────
+const canvas = document.getElementById('sol');
+const ctx    = canvas.getContext('2d');
+const cva    = document.getElementById('cva');
+
+let W, H, CX, CY, BASE;
+// Trails stored in AU (world space) so pan/zoom doesn't corrupt them
+let trails    = PLANETS.map(() => []); // [{x,y}]
+const TRAIL_MAX = 600;
+let showTrails = true, showLabels = true, showOrbits = true;
+
+// View
+let zoom=1, panX=0, panY=0, drag=null, hov=null;
+
+// Mode
+let mode='live', simPlaying=false, simJDE=null;
+// Live mode: we track a continuous JDE that advances with real clock
+// This means planets move in real-time at their true angular velocities
+let liveJDE = nowJDE(); // set once on load, then advanced by real dt
+
+const SIM_SPEEDS = [1, 7, 30, 365, 730, 1825, 3650, 36500];
+const SIM_LABELS = ['1 d/s','1 wk/s','1 mo/s','1 yr/s','2 yr/s','5 yr/s','10 yr/s','100 yr/s'];
+let simSpeedIdx = 3;
+
+// Trail accumulation: record a point every N days of simulation time
+// Live: ~0.1 day interval → trails build over hours/days of watching
+// Sim: proportional to speed so trails appear smoothly
+let lastTrailJDE = null;
+
+let pxy = PLANETS.map(() => ({ x:0, y:0, r:0, lon:0 }));
+
+function resize() {
+  W = cva.clientWidth; H = cva.clientHeight;
+  canvas.width = W; canvas.height = H;
+  CX = W/2; CY = H/2;
+  BASE = Math.min(W,H) * 0.038;
+}
+
+// ─── Zoom / pan (anchored to cursor) ─────────────────────────
+cva.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rc = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rc.left) * W / rc.width;
+  const my = (e.clientY - rc.top)  * H / rc.height;
+  const f  = e.deltaY < 0 ? 1.12 : 0.89;
+  panX = mx + (panX - mx) * f;
+  panY = my + (panY - my) * f;
+  zoom = Math.max(0.25, Math.min(zoom * f, 40));
+}, { passive: false });
+
+cva.addEventListener('mousedown', e => {
+  drag = { sx:e.clientX, sy:e.clientY, px:panX, py:panY };
+  canvas.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', e => {
+  if (drag) {
+    const rc = canvas.getBoundingClientRect();
+    panX = drag.px + (e.clientX - drag.sx) * W / rc.width;
+    panY = drag.py + (e.clientY - drag.sy) * H / rc.height;
+  }
+  const rc = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rc.left) * W / rc.width;
+  const my = (e.clientY - rc.top)  * H / rc.height;
+  hov = null;
+  PLANETS.forEach((p, i) => {
+    const { sx, sy } = toScreen(pxy[i]);
+    if (Math.hypot(mx-sx, my-sy) < p.vr + 10) hov = i;
+  });
+  canvas.style.cursor = drag ? 'grabbing' : (hov !== null ? 'pointer' : 'default');
+});
+window.addEventListener('mouseup', () => { drag = null; });
+
+function toScreen({ x, y }) {
+  const s = BASE * zoom;
+  return { sx: CX + panX + x*s, sy: CY + panY - y*s };
+}
+
+// ─── Draw helpers ─────────────────────────────────────────────
+function drawOrbit(p, JDE) {
+  const s = BASE * zoom;
+  const a = p.a * s;
+  const b = p.a * Math.sqrt(1 - p.e*p.e) * s;
+  const f = p.a * p.e * s;
+  const T = (JDE - 2451545) / 36525;
+  const w = (p.w0 + p.wdot*T) * Math.PI/180;
+  const ox = CX+panX, oy = CY+panY;
+  ctx.save();
+  ctx.translate(ox, oy);
+  ctx.rotate(-w);
+  ctx.beginPath();
+  ctx.ellipse(-f, 0, a, b, 0, 0, Math.PI*2);
+  ctx.restore();
+  ctx.strokeStyle = '#e8e8e8';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function drawSun() {
+  const { sx, sy } = toScreen({ x:0, y:0 });
+  const g = ctx.createRadialGradient(sx, sy, 2, sx, sy, 24);
+  g.addColorStop(0, 'rgba(255,185,0,0.6)');
+  g.addColorStop(1, 'rgba(255,185,0,0)');
+  ctx.beginPath(); ctx.arc(sx, sy, 24, 0, Math.PI*2);
+  ctx.fillStyle = g; ctx.fill();
+  ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI*2);
+  ctx.fillStyle = '#d4a017'; ctx.fill();
+}
+
+function drawTrail(i) {
+  const t = trails[i];
+  if (t.length < 2) return;
+  ctx.beginPath();
+  const p0 = toScreen(t[0]);
+  ctx.moveTo(p0.sx, p0.sy);
+  for (let j = 1; j < t.length; j++) {
+    const pt = toScreen(t[j]);
+    ctx.lineTo(pt.sx, pt.sy);
+  }
+  ctx.strokeStyle = PLANETS[i].col;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.35;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+function drawPlanet(i) {
+  const p = PLANETS[i], isH = hov === i;
+  const { sx, sy } = toScreen(pxy[i]);
+  const r = p.vr;
+
+  ctx.beginPath();
+  ctx.arc(sx, sy, isH ? r+2 : r, 0, Math.PI*2);
+  ctx.fillStyle = p.col;
+  ctx.fill();
+
+  if (p.name === 'Saturn') {
+    ctx.save(); ctx.translate(sx, sy); ctx.scale(1, 0.28);
+    [[r*1.9, 1.8],[r*2.5, 1.2]].forEach(([rad, lw]) => {
+      ctx.beginPath(); ctx.arc(0, 0, rad, 0, Math.PI*2);
+      ctx.strokeStyle = p.col; ctx.lineWidth = lw;
+      ctx.globalAlpha = 0.55; ctx.stroke(); ctx.globalAlpha = 1;
+    });
+    ctx.restore();
+  }
+
+  if (isH) {
+    ctx.beginPath(); ctx.arc(sx, sy, r+7, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(0,0,0,0.14)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  if (showLabels) {
+    ctx.fillStyle = isH ? 'rgba(15,15,15,0.9)' : 'rgba(15,15,15,0.32)';
+    ctx.font = `300 10px 'DM Mono', monospace`;
+    ctx.fillText(p.name, sx + r + 6, sy + 4);
+  }
+}
+
+// ─── Main loop ────────────────────────────────────────────────
+let lastTs = null;
+
+function frame(ts) {
+  if (!lastTs) lastTs = ts;
+  const dtSec = Math.min((ts - lastTs) / 1000, 0.1);
+  lastTs = ts;
+
+  let JDE;
+
+  if (mode === 'live') {
+    // Advance by real elapsed seconds → true planetary motion
+    // Mercury: 4.09°/day = 0.0000474°/sec → fully correct live movement
+    liveJDE += dtSec / 86400; // convert seconds → days
+    JDE = liveJDE;
+  } else {
+    if (simPlaying) simJDE += SIM_SPEEDS[simSpeedIdx] * dtSec;
+    JDE = simJDE;
+  }
+
+  // Compute positions
+  pxy = PLANETS.map(p => planetXY(p, JDE));
+
+  // Accumulate trails (stored in world-space AU, so zoom/pan safe)
+  // Interval: live = every 0.5 days (~12hrs), sim = every 0.5% of speed
+  const trailInterval = mode === 'live'
+    ? 0.5
+    : Math.max(0.1, SIM_SPEEDS[simSpeedIdx] * 0.02);
+
+  if (!lastTrailJDE || Math.abs(JDE - lastTrailJDE) >= trailInterval) {
+    pxy.forEach(({ x, y }, i) => {
+      trails[i].push({ x, y });
+      if (trails[i].length > TRAIL_MAX) trails[i].shift();
+    });
+    lastTrailJDE = JDE;
+  }
+
+  // Render
+  ctx.clearRect(0, 0, W, H);
+
+  if (showOrbits) PLANETS.forEach(p => drawOrbit(p, JDE));
+  if (showTrails) PLANETS.forEach((_, i) => drawTrail(i));
+  drawSun();
+  PLANETS.forEach((_, i) => drawPlanet(i));
+
+  updateUI(JDE);
+  updateList();
+  requestAnimationFrame(frame);
+}
+
+// ─── Panel updates ────────────────────────────────────────────
+function updateUI(JDE) {
+  const d = jdeToDate(JDE);
+  if (mode === 'live') {
+    document.getElementById('dateBig').textContent = fmtFull(d);
+    document.getElementById('dateSub').textContent = 'UTC — live';
+  } else {
+    document.getElementById('dateBig').textContent = fmtShort(d);
+    document.getElementById('dateSub').textContent = 'simulated';
+    document.getElementById('simDateTxt').textContent = fmtShort(d);
+  }
+  if (hov !== null) {
+    const p = PLANETS[hov];
+    document.getElementById('hudH').textContent =
+      `${p.name}  ·  ${pxy[hov].r.toFixed(4)} AU  ·  ${p.speedDegDay.toFixed(4)}°/day`;
+  } else {
+    document.getElementById('hudH').textContent = '';
+  }
+}
+
+function buildList() {
+  const list = document.getElementById('plist');
+  PLANETS.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'pitem'; el.id = 'pi'+i;
+    const periodStr = p.periodDays < 365
+      ? p.periodDays.toFixed(1)+' d'
+      : (p.periodDays/365.25).toFixed(2)+' yr';
+    el.innerHTML = `
+      <div class="pdot" style="background:${p.col}"></div>
+      <div class="pinfo">
+        <div class="pname">${p.name}</div>
+        <div class="psub">${p.dist} · ${periodStr}</div>
+      </div>
+      <div class="pangle" id="pa${i}">—</div>`;
+    list.appendChild(el);
+  });
+}
+
+function updateList() {
+  PLANETS.forEach((_, i) => {
+    document.getElementById('pi'+i)?.classList.toggle('hl', hov===i);
+    // Show ecliptic longitude (real angular position)
+    document.getElementById('pa'+i).textContent = pxy[i].lon.toFixed(2)+'°';
+  });
+}
+
+// ─── Controls ─────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  if (m === 'sim') {
+    simJDE = liveJDE; // start simulation from current live position
+    simPlaying = false;
+    document.getElementById('btnPlay').textContent = '▶ play';
+    document.getElementById('btnPlay').classList.remove('on');
+    document.getElementById('simPanel').style.display = '';
+    document.getElementById('ldot').classList.add('paused');
+    document.getElementById('ltxt').textContent = 'simulation';
+  } else {
+    simPlaying = false;
+    liveJDE = nowJDE(); // resync live clock to real time
+    document.getElementById('simPanel').style.display = 'none';
+    document.getElementById('ldot').classList.remove('paused');
+    document.getElementById('ltxt').textContent = 'live';
+    trails = PLANETS.map(() => []); lastTrailJDE = null;
+  }
+  document.getElementById('mLive').classList.toggle('on', m==='live');
+  document.getElementById('mSim').classList.toggle('on', m==='sim');
+}
+
+function togglePlay() {
+  simPlaying = !simPlaying;
+  const b = document.getElementById('btnPlay');
+  b.textContent = simPlaying ? '⏸ pause' : '▶ play';
+  b.classList.toggle('on', simPlaying);
+  if (simPlaying) { trails = PLANETS.map(() => []); lastTrailJDE = null; }
+}
+
+function resetSim() {
+  simJDE = nowJDE(); simPlaying = false;
+  document.getElementById('btnPlay').textContent = '▶ play';
+  document.getElementById('btnPlay').classList.remove('on');
+  trails = PLANETS.map(() => []); lastTrailJDE = null;
+}
+
+function onSpd(el) {
+  simSpeedIdx = parseInt(el.value);
+  document.getElementById('spdV').textContent = SIM_LABELS[simSpeedIdx];
+}
+
+function togT() {
+  showTrails = !showTrails;
+  document.getElementById('btnT').classList.toggle('on', showTrails);
+  if (!showTrails) { trails = PLANETS.map(() => []); lastTrailJDE = null; }
+}
+function togL() { showLabels = !showLabels; document.getElementById('btnL').classList.toggle('on', showLabels); }
+function togO() { showOrbits = !showOrbits; document.getElementById('btnO').classList.toggle('on', showOrbits); }
+function resetView() { zoom=1; panX=0; panY=0; }
+
+window.addEventListener('resize', () => {
+  resize();
+  // trails are in world space so they survive resize fine
+});
+
+resize();
+buildList();
+document.getElementById('spdV').textContent = SIM_LABELS[simSpeedIdx];
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

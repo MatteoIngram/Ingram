@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandelbrot Set — Matteo Martin Ingram</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #0f0f0f;
+  --ink2:   #999;
+  --ink3:   #ccc;
+  --border: #ececec;
+  --white:  #fff;
+}
+
+html, body {
+  height: 100vh; overflow: hidden;
+  background: var(--white); color: var(--ink);
+  font-family: 'DM Mono', monospace;
+}
+
+.bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--white); z-index: 50;
+}
+.bar-back { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 300; letter-spacing: 0.1em; color: var(--ink3); text-decoration: none; transition: color .15s; }
+.bar-back:hover { color: var(--ink); }
+.bar-title { font-family: 'EB Garamond', Georgia, serif; font-size: 15px; font-weight: 400; letter-spacing: 0.04em; color: var(--ink2); }
+.bar-year  { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 300; color: var(--ink3); letter-spacing: 0.08em; }
+
+.layout { display: flex; height: 100vh; padding-top: 56px; }
+
+/* canvas fills remaining space */
+.cv-area {
+  flex: 1; position: relative; overflow: hidden; cursor: crosshair;
+}
+#mb { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+
+/* thin progress line across bottom */
+.prog {
+  position: absolute; bottom: 0; left: 0;
+  height: 1px; width: 0%;
+  background: var(--ink3);
+  transition: width 0.04s linear; pointer-events: none;
+}
+
+.hud-bottom {
+  position: absolute; bottom: 20px; left: 24px;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.1em;
+  color: var(--ink3); line-height: 2; pointer-events: none;
+  user-select: none;
+}
+.hud-coord { color: var(--ink2); font-size: 10px; }
+
+/* ── panel ── */
+.panel {
+  width: 300px; flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow-y: auto; background: var(--white);
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.panel::-webkit-scrollbar { width: 3px; }
+.panel::-webkit-scrollbar-thumb { background: var(--border); }
+
+.prow { padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.plabel { font-size: 9px; font-weight: 300; letter-spacing: 0.16em; color: var(--ink3); text-transform: uppercase; margin-bottom: 10px; }
+
+/* render status */
+.live-row { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 300; letter-spacing: 0.06em; color: var(--ink2); }
+.rdot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink3); transition: background .2s; }
+.rdot.active { background: var(--ink); animation: bl 1s ease-in-out infinite; }
+@keyframes bl { 0%,100%{opacity:1} 50%{opacity:.12} }
+
+/* zoom */
+.zoom-big { font-family: 'EB Garamond', Georgia, serif; font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 3px; }
+.zoom-sub { font-size: 9px; font-weight: 300; letter-spacing: 0.12em; color: var(--ink3); text-transform: uppercase; }
+
+/* coords */
+.coord-row { display: flex; flex-direction: column; gap: 6px; }
+.cfield { display: flex; flex-direction: column; gap: 2px; }
+.cfield-label { font-size: 9px; font-weight: 300; letter-spacing: 0.14em; color: var(--ink3); text-transform: uppercase; }
+.cfield-val { font-size: 10px; font-weight: 300; color: var(--ink2); font-variant-numeric: tabular-nums; word-break: break-all; letter-spacing: 0.04em; }
+
+/* buttons */
+.ctrl-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--ink2); font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 12px;
+  cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.btn:hover { border-color: var(--ink2); color: var(--ink); }
+.btn.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.btn-full { width: 100%; margin-bottom: 8px; text-align: center; display: block; }
+
+.sl-row { display: flex; align-items: center; gap: 10px; }
+.sl-label { font-size: 9px; font-weight: 300; letter-spacing: 0.1em; color: var(--ink3); white-space: nowrap; }
+input[type=range] {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 1px; background: var(--border); outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 9px; height: 9px;
+  background: var(--ink); border-radius: 50%;
+}
+.sl-val { font-size: 9px; font-weight: 300; color: var(--ink2); min-width: 30px; text-align: right; }
+
+/* palette swatches */
+.swatch-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.swatch {
+  width: 24px; height: 24px; border-radius: 2px;
+  border: 1px solid var(--border); cursor: pointer; transition: border-color .15s;
+}
+.swatch.on { border-color: var(--ink); }
+.swatch:hover { border-color: var(--ink2); }
+
+/* presets */
+.preset-item {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: opacity .15s;
+}
+.preset-item:last-child { border-bottom: none; }
+.preset-item:hover { opacity: 0.45; }
+.preset-name { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; font-weight: 400; color: var(--ink); }
+.preset-arr  { font-size: 10px; color: var(--ink3); font-family: 'DM Mono', monospace; }
+
+/* about / formula */
+.about-p { font-size: 10px; font-weight: 300; letter-spacing: 0.04em; color: var(--ink2); line-height: 1.85; }
+.formula { margin-top: 14px; padding: 12px 14px; border-left: 1px solid var(--border); }
+.formula-line { font-size: 11px; font-weight: 300; letter-spacing: 0.06em; color: var(--ink); line-height: 2; }
+.julia-note { margin-top: 10px; font-size: 9px; font-weight: 300; letter-spacing: 0.06em; color: var(--ink3); line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <a class="bar-back" href="index.html">Matteo Martin Ingram</a>
+  <span class="bar-title">Mandelbrot Set</span>
+  <span class="bar-year">2026</span>
+</div>
+
+<div class="layout">
+  <div class="cv-area" id="cva">
+    <canvas id="mb"></canvas>
+    <div class="prog" id="prog"></div>
+    <div class="hud-bottom">
+      <div>scroll · zoom &nbsp;&nbsp; drag · pan &nbsp;&nbsp; dbl-click · centre+zoom</div>
+      <div class="hud-coord" id="hudC">—</div>
+    </div>
+  </div>
+
+  <div class="panel">
+
+    <div class="prow">
+      <div class="plabel">status</div>
+      <div class="live-row"><div class="rdot" id="rdot"></div><span id="rtxt">ready</span></div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">zoom</div>
+      <div class="zoom-big" id="zBig">×1</div>
+      <div class="zoom-sub">magnification</div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">position</div>
+      <div class="coord-row">
+        <div class="cfield">
+          <div class="cfield-label">Re(c)</div>
+          <div class="cfield-val" id="cRe">—</div>
+        </div>
+        <div class="cfield">
+          <div class="cfield-label">Im(c)</div>
+          <div class="cfield-val" id="cIm">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">controls</div>
+      <button class="btn btn-full" id="btnJ" onclick="togJulia()">Julia mode · off</button>
+      <div class="ctrl-row">
+        <button class="btn" onclick="doReset()">reset view</button>
+        <button class="btn" onclick="doReset2()">full set</button>
+      </div>
+      <div class="sl-row" style="margin-top:8px">
+        <span class="sl-label">iterations</span>
+        <input type="range" id="iterR" min="64" max="1024" step="32" value="256" oninput="onIter(this)"/>
+        <span class="sl-val" id="iterV">256</span>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">palette</div>
+      <div class="swatch-row" id="swatches"></div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">locations</div>
+      <div id="presets"></div>
+    </div>
+
+    <div class="prow">
+      <div class="plabel">about</div>
+      <div class="about-p">The Mandelbrot set is the set of complex numbers <em>c</em> for which the iteration below remains bounded. Its boundary is a fractal — infinite detail at every scale of magnification.</div>
+      <div class="formula">
+        <div class="formula-line">z₀ = 0</div>
+        <div class="formula-line">z<sub>n+1</sub> = z<sub>n</sub>² + c</div>
+      </div>
+      <div class="julia-note">Julia mode: click any point on the canvas to set that value as the constant <em>c</em> and render its corresponding Julia set.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// VIEW STATE — stored as centre (cx,cy) + half-width (hw)
+// This ensures zoom always stays anchored to cursor position
+// ═══════════════════════════════════════════════════════════
+let cx = -0.5, cy = 0.0, hw = 1.5; // half-width of complex plane shown
+// full Mandelbrot fits in [-2.5,1]x[-1.25,1.25], hw=1.75 gives good margin
+
+let maxIter = 256, palIdx = 0;
+let juliaMode = false, juliaC = { r: -0.7, i: 0.27 };
+let dirty = true, rendering = false;
+let hovCR = 0, hovCI = 0;
+let drag = null;
+let imgData = null;
+let W, H;
+
+const cva    = document.getElementById('cva');
+const canvas = document.getElementById('mb');
+const ctx    = canvas.getContext('2d');
+
+function resize() {
+  W = cva.clientWidth; H = cva.clientHeight;
+  canvas.width = W; canvas.height = H;
+  dirty = true; imgData = null;
+}
+
+// ─── coordinate conversions ──────────────────────────────────
+// screenToComplex: pixel (px,py) -> complex (cr,ci)
+function s2c(px, py) {
+  const hh = hw * H / W;   // half-height in complex units
+  return {
+    r: cx + (px / W - 0.5) * 2 * hw,
+    i: cy - (py / H - 0.5) * 2 * hh
+  };
+}
+function complexWidth()  { return 2 * hw; }
+function complexHeight() { return 2 * hw * H / W; }
+
+// ─── ZOOM (anchored to mouse position) ──────────────────────
+function doZoom(factor, pivotPx, pivotPy) {
+  // pivot point in complex space must stay fixed
+  const p = s2c(pivotPx, pivotPy);
+  hw *= factor;
+  // recalc centre so pivot stays at same screen position
+  cx = p.r - (pivotPx / W - 0.5) * 2 * hw;
+  cy = p.i + (pivotPy / H - 0.5) * 2 * hw * H / W;
+  dirty = true;
+}
+
+// ─── INTERACTIONS ────────────────────────────────────────────
+cva.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rc = cva.getBoundingClientRect();
+  const px = e.clientX - rc.left;
+  const py = e.clientY - rc.top;
+  const factor = e.deltaY > 0 ? 1.15 : 1 / 1.15;
+  doZoom(factor, px, py);
+}, { passive: false });
+
+cva.addEventListener('mousedown', e => {
+  const rc = cva.getBoundingClientRect();
+  drag = {
+    startPx: e.clientX - rc.left,
+    startPy: e.clientY - rc.top,
+    startCx: cx, startCy: cy
+  };
+  canvas.style.cursor = 'grabbing';
+});
+
+window.addEventListener('mousemove', e => {
+  const rc = cva.getBoundingClientRect();
+  if (!rc.width) return;
+  const px = e.clientX - rc.left;
+  const py = e.clientY - rc.top;
+  const c = s2c(px, py);
+  hovCR = c.r; hovCI = c.i;
+
+  if (drag) {
+    // translate: how many complex units did mouse move?
+    const dx = (px - drag.startPx) / W * 2 * hw;
+    const dy = (py - drag.startPy) / H * 2 * hw * H / W;
+    cx = drag.startCx - dx;
+    cy = drag.startCy + dy;
+    dirty = true;
+    canvas.style.cursor = 'grabbing';
+  } else {
+    canvas.style.cursor = 'crosshair';
+  }
+});
+
+window.addEventListener('mouseup', () => { drag = null; });
+
+cva.addEventListener('dblclick', e => {
+  const rc = cva.getBoundingClientRect();
+  const px = e.clientX - rc.left;
+  const py = e.clientY - rc.top;
+  // centre on click then zoom in 3×
+  const c = s2c(px, py);
+  cx = c.r; cy = c.i;
+  hw /= 3;
+  dirty = true;
+});
+
+// Julia mode: click sets C
+cva.addEventListener('click', e => {
+  if (!juliaMode) return;
+  juliaC.r = hovCR; juliaC.i = hovCI;
+  dirty = true;
+});
+
+// touch pinch/pan
+let touches = {};
+let lastPinchDist = null;
+let lastPinchMid  = null;
+cva.addEventListener('touchstart', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => { touches[t.identifier] = { x: t.clientX, y: t.clientY }; });
+  if (Object.keys(touches).length === 1) {
+    const rc = cva.getBoundingClientRect();
+    const [t] = Object.values(touches);
+    drag = { startPx: t.x - rc.left, startPy: t.y - rc.top, startCx: cx, startCy: cy };
+    lastPinchDist = null;
+  }
+}, { passive: false });
+
+cva.addEventListener('touchmove', e => {
+  e.preventDefault();
+  Array.from(e.changedTouches).forEach(t => { touches[t.identifier] = { x: t.clientX, y: t.clientY }; });
+  const pts = Object.values(touches);
+  const rc  = cva.getBoundingClientRect();
+  if (pts.length === 1) {
+    if (!drag) return;
+    const px = pts[0].x - rc.left, py = pts[0].y - rc.top;
+    const dx = (px - drag.startPx) / W * 2 * hw;
+    const dy = (py - drag.startPy) / H * 2 * hw * H / W;
+    cx = drag.startCx - dx; cy = drag.startCy + dy; dirty = true;
+  } else if (pts.length === 2) {
+    const dx = pts[0].x - pts[1].x, dy = pts[0].y - pts[1].y;
+    const dist = Math.hypot(dx, dy);
+    const mid  = { x: (pts[0].x + pts[1].x) / 2 - rc.left, y: (pts[0].y + pts[1].y) / 2 - rc.top };
+    if (lastPinchDist !== null) {
+      const factor = lastPinchDist / dist;
+      doZoom(factor, lastPinchMid.x, lastPinchMid.y);
+    }
+    lastPinchDist = dist; lastPinchMid = mid; drag = null;
+  }
+}, { passive: false });
+
+cva.addEventListener('touchend', e => {
+  Array.from(e.changedTouches).forEach(t => { delete touches[t.identifier]; });
+  if (Object.keys(touches).length < 2) { lastPinchDist = null; lastPinchMid = null; }
+  if (Object.keys(touches).length === 0) drag = null;
+}, { passive: true });
+
+// ─── PALETTES ────────────────────────────────────────────────
+const PALS = [
+  { name: 'Classic',
+    sw: ['#ffffff','#d0e8ff','#0055aa','#0f0f0f'],
+    fn(n, m) {
+      if (n === m) return [15, 15, 15];
+      const t = n / m;
+      // smooth colouring
+      const s = Math.pow(t, 0.5);
+      if (s < 0.5) {
+        const u = s * 2;
+        return [~~(255 - u * 220), ~~(232 - u * 140), ~~(255 - u * 85)];
+      }
+      const u = (s - 0.5) * 2;
+      return [~~(35 - u * 30), ~~(92 + u * 20), ~~(170 + u * 85)];
+    }
+  },
+  { name: 'Ink',
+    sw: ['#f5f5f5','#bbbbbb','#555555','#0f0f0f'],
+    fn(n, m) {
+      if (n === m) return [15, 15, 15];
+      const v = ~~(Math.pow(n / m, 0.45) * 240);
+      return [v, v, v];
+    }
+  },
+  { name: 'Ember',
+    sw: ['#fff8f0','#ffcc80','#cc4400','#1a0800'],
+    fn(n, m) {
+      if (n === m) return [10, 3, 0];
+      const t = Math.pow(n / m, 0.5);
+      return [
+        ~~(t < .5 ? t * 2 * 200 : 200 + (t - .5) * 2 * 55),
+        ~~(t * t * 150),
+        ~~(t < .3 ? t / .3 * 60 : 60 * (1 - (t - .3) / .7))
+      ];
+    }
+  },
+  { name: 'Midnight',
+    sw: ['#e8e0ff','#6040d0','#001060','#000008'],
+    fn(n, m) {
+      if (n === m) return [0, 0, 8];
+      const t = Math.pow(n / m, 0.5);
+      return [~~(t * 140 + 80), ~~(t * 80 + 20), ~~(100 + t * 155)];
+    }
+  },
+  { name: 'Sage',
+    sw: ['#f0f8f0','#80c880','#204820','#080f08'],
+    fn(n, m) {
+      if (n === m) return [8, 15, 8];
+      const t = Math.pow(n / m, 0.5);
+      return [~~(t * 80 + 40), ~~(t * 180 + 40), ~~(t * 80 + 30)];
+    }
+  },
+  { name: 'Gold',
+    sw: ['#fffce8','#ffd050','#8a5000','#100800'],
+    fn(n, m) {
+      if (n === m) return [10, 8, 0];
+      const t = Math.pow(n / m, 0.5);
+      return [~~(t * 255 * 0.99), ~~(t * 255 * 0.82), ~~(t * 255 * 0.22)];
+    }
+  },
+];
+
+const PRESETS = [
+  { name: 'Full set',         cx: -0.5,        cy: 0,         hw: 1.75  },
+  { name: 'Seahorse Valley',  cx: -0.743643,   cy: 0.131825,  hw: 0.008 },
+  { name: 'Elephant Valley',  cx:  0.30820,    cy: 0.01880,   hw: 0.028 },
+  { name: 'Triple Spiral',    cx: -0.088631,   cy: 0.650888,  hw: 0.003 },
+  { name: 'Mini Mandelbrot',  cx: -1.769383,   cy: 0.004230,  hw: 0.004 },
+  { name: 'Lightning',        cx: -0.1592,     cy: 1.0317,    hw: 0.006 },
+  { name: 'Feather',          cx: -1.401155,   cy: 0,         hw: 0.002 },
+];
+
+// ─── RENDER (chunked, no cancel needed — dirty flag) ─────────
+function render() {
+  if (rendering) return;
+  rendering = true;
+  const rdot = document.getElementById('rdot');
+  rdot.classList.add('active');
+  document.getElementById('rtxt').textContent = 'rendering';
+  const prog = document.getElementById('prog');
+  prog.style.width = '0%';
+
+  // snapshot view at render start
+  const snapCx = cx, snapCy = cy, snapHw = hw;
+  const cw = canvas.width, ch = canvas.height;
+  if (!imgData || imgData.width !== cw || imgData.height !== ch) {
+    imgData = ctx.createImageData(cw, ch);
+  }
+  const d  = imgData.data;
+  const fn = PALS[palIdx].fn;
+  const hh = snapHw * ch / cw;
+
+  const CHUNK = 20; let row = 0;
+
+  function chunk() {
+    // if view changed mid-render, abort and re-render
+    if (cx !== snapCx || cy !== snapCy || hw !== snapHw) {
+      rendering = false; rdot.classList.remove('active');
+      document.getElementById('rtxt').textContent = 'ready';
+      prog.style.width = '0%';
+      dirty = true; return;
+    }
+    const end = Math.min(row + CHUNK, ch);
+    for (let py = row; py < end; py++) {
+      // ci: map py -> imaginary
+      const ci = snapCy + (0.5 - py / ch) * 2 * hh;
+      for (let px = 0; px < cw; px++) {
+        const cr = snapCx + (px / cw - 0.5) * 2 * snapHw;
+        let zr = juliaMode ? cr : 0;
+        let zi = juliaMode ? ci : 0;
+        const jcr = juliaMode ? juliaC.r : cr;
+        const jci = juliaMode ? juliaC.i : ci;
+        let n = 0, zr2 = zr * zr, zi2 = zi * zi;
+        while (n < maxIter && zr2 + zi2 < 4) {
+          zi  = 2 * zr * zi + jci;
+          zr  = zr2 - zi2 + jcr;
+          zr2 = zr * zr; zi2 = zi * zi;
+          n++;
+        }
+        const [r, g, b] = fn(n, maxIter);
+        const idx = (py * cw + px) * 4;
+        d[idx] = r; d[idx+1] = g; d[idx+2] = b; d[idx+3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    row = end;
+    prog.style.width = `${row / ch * 100}%`;
+    if (row < ch) {
+      requestAnimationFrame(chunk);
+    } else {
+      rendering = false; dirty = false;
+      prog.style.width = '0%';
+      rdot.classList.remove('active');
+      document.getElementById('rtxt').textContent = 'ready';
+    }
+  }
+  requestAnimationFrame(chunk);
+}
+
+function loop() {
+  if (dirty && !rendering) render();
+  updateHUD();
+  requestAnimationFrame(loop);
+}
+
+function updateHUD() {
+  const z = 1.75 / hw;
+  let zStr;
+  if (z < 1000)       zStr = '×' + z.toFixed(2);
+  else if (z < 1e6)   zStr = '×' + z.toFixed(0);
+  else if (z < 1e9)   zStr = '×' + (z / 1e6).toFixed(2) + 'M';
+  else                zStr = '×' + z.toExponential(2);
+
+  document.getElementById('zBig').textContent  = zStr;
+  document.getElementById('cRe').textContent   = hovCR.toFixed(12);
+  document.getElementById('cIm').textContent   = hovCI.toFixed(12);
+  const sign = hovCI >= 0 ? '+' : '-';
+  document.getElementById('hudC').textContent  = `${hovCR.toFixed(9)} ${sign} ${Math.abs(hovCI).toFixed(9)}i`;
+}
+
+// ─── CONTROLS ────────────────────────────────────────────────
+function doReset()  { cx = -0.5; cy = 0; hw = 1.75; juliaMode = false; document.getElementById('btnJ').textContent = 'Julia mode · off'; document.getElementById('btnJ').classList.remove('on'); dirty = true; }
+function doReset2() { cx = -0.75; cy = 0; hw = 1.75; dirty = true; }
+function onIter(el) { maxIter = parseInt(el.value); document.getElementById('iterV').textContent = maxIter; dirty = true; }
+function togJulia() {
+  juliaMode = !juliaMode;
+  const b = document.getElementById('btnJ');
+  b.textContent = juliaMode ? 'Julia mode · on — click canvas' : 'Julia mode · off';
+  b.classList.toggle('on', juliaMode);
+  if (juliaMode) { cx = 0; cy = 0; hw = 1.75; }
+  else           { cx = -0.5; cy = 0; hw = 1.75; }
+  dirty = true;
+}
+
+function buildSwatches() {
+  const row = document.getElementById('swatches');
+  PALS.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'swatch' + (i === 0 ? ' on' : '');
+    el.style.background = `linear-gradient(135deg, ${p.sw.join(',')})`;
+    el.title = p.name;
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.swatch').forEach(e => e.classList.remove('on'));
+      el.classList.add('on'); palIdx = i; dirty = true;
+    });
+    row.appendChild(el);
+  });
+}
+
+function buildPresets() {
+  const c = document.getElementById('presets');
+  PRESETS.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'preset-item';
+    el.innerHTML = `<span class="preset-name">${p.name}</span><span class="preset-arr">→</span>`;
+    el.addEventListener('click', () => {
+      juliaMode = false;
+      document.getElementById('btnJ').textContent = 'Julia mode · off';
+      document.getElementById('btnJ').classList.remove('on');
+      cx = p.cx; cy = p.cy; hw = p.hw; dirty = true;
+    });
+    c.appendChild(el);
+  });
+}
+
+window.addEventListener('resize', () => resize());
+resize();
+buildSwatches();
+buildPresets();
+loop();
+</script>
+</body>
+</html>
