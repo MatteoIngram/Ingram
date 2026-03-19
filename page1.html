@@ -311,6 +311,12 @@ html, body {
   margin-bottom: 10px;
 }
 
+.paths-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .paths-clear-btn {
   font-family: var(--mono);
   font-size: 9px;
@@ -324,6 +330,43 @@ html, body {
   text-underline-offset: 3px;
 }
 .paths-clear-btn:hover { color: var(--ink); }
+
+/* ── SAVE BUTTON ── */
+.paths-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .06em;
+  color: var(--ink2);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+
+.paths-save-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--off);
+}
+
+.paths-save-btn:active {
+  background: var(--ink4);
+}
+
+.paths-save-btn svg {
+  flex-shrink: 0;
+}
+
+/* Flash state for feedback */
+.paths-save-btn.saved {
+  border-color: var(--order);
+  color: var(--order);
+}
 
 /* ── DIVIDER ── */
 .div-line {
@@ -533,7 +576,16 @@ html, body {
       <div>
         <div class="paths-header">
           <div class="section-label" style="margin-bottom:0;">all paths — bob 2</div>
-          <button class="paths-clear-btn" id="clearPathsBtn">clear</button>
+          <div class="paths-actions">
+            <button class="paths-clear-btn" id="clearPathsBtn">clear</button>
+            <button class="paths-save-btn" id="savePathsBtn" title="Download paths as PNG">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 1v5.5M5 6.5L3 4.5M5 6.5L7 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M1.5 8h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              save png
+            </button>
+          </div>
         </div>
         <div class="paths-wrap">
           <canvas id="pathsCanvas"></canvas>
@@ -1197,10 +1249,10 @@ function simToPath(x, y) {
   const dy = y - pivotY;
   // scale them to fit paths canvas — SCALE is pixels-per-metre on sim canvas
   const PW = pathsW(), PH = pathsH();
-  const pathScale = Math.min(PW, PH) * 0.40 / SCALE;
+  const pathScale = Math.min(PW, PH) * 0.28 / SCALE;
   return {
     px: PW/2 + dx * pathScale,
-    py: PH * 0.38 + dy * pathScale
+    py: PH * 0.30 + dy * pathScale
   };
 }
 
@@ -1213,8 +1265,8 @@ function redrawAllPaths() {
   // faint pivot cross
   pathsCtx.strokeStyle = '#f0f0f0';
   pathsCtx.lineWidth = 0.5;
-  pathsCtx.beginPath(); pathsCtx.moveTo(PW/2-14, PH*0.38); pathsCtx.lineTo(PW/2+14, PH*0.38); pathsCtx.stroke();
-  pathsCtx.beginPath(); pathsCtx.moveTo(PW/2, PH*0.38-10); pathsCtx.lineTo(PW/2, PH*0.38+10); pathsCtx.stroke();
+  pathsCtx.beginPath(); pathsCtx.moveTo(PW/2-14, PH*0.30); pathsCtx.lineTo(PW/2+14, PH*0.30); pathsCtx.stroke();
+  pathsCtx.beginPath(); pathsCtx.moveTo(PW/2, PH*0.30-10); pathsCtx.lineTo(PW/2, PH*0.30+10); pathsCtx.stroke();
 
   if (allRuns.length === 0 && currentRunPoints.length === 0) {
     pathsCtx.font = `300 11px 'DM Mono'`;
@@ -1316,6 +1368,46 @@ $('clearPathsBtn').addEventListener('click', () => {
   redrawAllPaths();
 });
 
+// ══ SAVE PATHS AS PNG ═════════════════════════════════════════════════════════
+$('savePathsBtn').addEventListener('click', () => {
+  const btn = $('savePathsBtn');
+
+  // Make sure the canvas is fully drawn before exporting
+  redrawAllPaths();
+
+  // Generate filename with timestamp
+  const now = new Date();
+  const ts = [
+    now.getFullYear(),
+    String(now.getMonth()+1).padStart(2,'0'),
+    String(now.getDate()).padStart(2,'0'),
+    '-',
+    String(now.getHours()).padStart(2,'0'),
+    String(now.getMinutes()).padStart(2,'0'),
+    String(now.getSeconds()).padStart(2,'0')
+  ].join('');
+  const runCount = allRuns.length + (currentRunPoints.length > 10 ? 1 : 0);
+  const filename = `pendulum-paths-${runCount}runs-${ts}.png`;
+
+  // Export canvas to PNG and trigger download
+  pathsCvs.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+
+  // Brief visual feedback
+  btn.classList.add('saved');
+  btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 5.5L3.5 7.5L8.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg> saved`;
+  setTimeout(() => {
+    btn.classList.remove('saved');
+    btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 1v5.5M5 6.5L3 4.5M5 6.5L7 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.5 8h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> save png`;
+  }, 1800);
+});
+
 // Redraw paths canvas every N frames
 let pathsFrameCount = 0;
 
@@ -1324,554 +1416,5 @@ setTimeout(() => { updatePivot(); drawFrame(); }, 100);
 window.addEventListener('resize', () => { setTimeout(resizePathsCanvas, 80); });
 setTimeout(resizePathsCanvas, 120);
 </script>
-</body>
-</html>    }
-    
-    .hero-section {
-      background: linear-gradient(rgba(0, 39, 77, 0.8), rgba(0, 39, 77, 0.8)), url('LondonBG.jpg');
-      background-size: cover;
-      background-position: center;
-      color: #FFFFFF;
-      height: 60vh;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .hero-section h1 {
-      font-size: 3.5rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    .hero-section p {
-      font-size: 1.25rem;
-      margin-top: 20px;
-      margin-bottom: 40px;
-    }
-    
-    .section-title {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #00274D;
-      margin-bottom: 40px;
-    }
-    
-    .stock-card {
-      background-color: #FFFFFF;
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      margin-bottom: 30px;
-      transition: transform 0.3s ease;
-    }
-    .stock-card:hover {
-      transform: translateY(-5px);
-    }
-    .stock-card h3 {
-      color: #00274D;
-      border-bottom: 2px solid #FFC857;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .stock-chart {
-      height: 300px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    
-    .performance-summary {
-      background-color: #00274D;
-      color: white;
-      padding: 30px;
-      border-radius: 10px;
-      margin-bottom: 40px;
-    }
-    
-    .performance-number {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #FFC857;
-    }
-    
-    .footer {
-      background-color: #00274D;
-      padding: 60px 0 30px;
-      position: relative;
-    }
-    .footer h5 {
-      color: #FFC857;
-      font-size: 1.1rem;
-      letter-spacing: 1px;
-    }
-    .footer a {
-      transition: all 0.3s ease;
-    }
-    .footer a:hover {
-      color: #FFC857 !important;
-      text-decoration: none;
-    }
-    
-    .back-to-top {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: none;
-      z-index: 1000;
-      background-color: #FFC857;
-      color: #00274D;
-      border: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-  </style>
-</head>
-<body>
-
- <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container">
-    <a class="navbar-brand" href="index.html">Ingram Capital</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <!-- Dropdown for Tools -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Tools
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="page2.html">CEM</a></li>
-            <li><a class="dropdown-item" href="#">Research</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#about">About Us</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container">
-      <h1>Stock Research Center</h1>
-      <p>In-depth analysis and performance tracking of our top investment opportunities</p>
-    </div>
-  </section>
-
-  <!-- Stocks Section -->
-  <section class="py-5">
-    <div class="container">
-      <h2 class="section-title text-center">Featured Stocks</h2>
-      
-      <!-- Performance Summary -->
-      <div class="performance-summary">
-        <div class="row">
-          <div class="col-md-8">
-            <h3>Portfolio Performance Summary</h3>
-            <p>The combined yearly performance of our featured stocks shows the strength of our selection strategy across different market sectors.</p>
-          </div>
-          <div class="col-md-4 text-end">
-            <div class="performance-number">+28.4%</div>
-            <p>Average 1-Year Return</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row">
-        
-        <!-- General Electric -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>General Electric (GE)</h3>
-            <div class="stock-chart">
-              <!-- TradingView Widget -->
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NYSE:GE",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>General Electric is a multinational conglomerate operating in aviation, power, renewable energy, and healthcare. After years of restructuring, GE has refocused on its core industrial businesses and is showing signs of turnaround.</p>
-            <p><strong>Sector:</strong> Industrials</p>
-            <p><strong>Key Metrics:</strong> P/E 15.2, Div Yield 0.3%, Market Cap $140B</p>
-            <p><strong>1-Year Performance:</strong> +42.5%</p>
-          </div>
-        </div>
-        
-        <!-- Alibaba -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>Alibaba Group (BABA)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NYSE:BABA",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>Alibaba is China's largest e-commerce company and a leader in cloud computing, digital media, and innovation initiatives. While facing regulatory challenges, it remains a dominant force in China's digital economy.</p>
-            <p><strong>Sector:</strong> Consumer Discretionary</p>
-            <p><strong>Key Metrics:</strong> P/E 13.8, Market Cap $190B</p>
-            <p><strong>1-Year Performance:</strong> -12.3%</p>
-          </div>
-        </div>
-        
-        <!-- JD.com -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>JD.com (JD)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NASDAQ:JD",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>JD.com is China's largest online direct sales company, known for its efficient logistics network and authentic product guarantees. The company has been expanding into healthcare and international markets.</p>
-            <p><strong>Sector:</strong> Consumer Discretionary</p>
-            <p><strong>Key Metrics:</strong> P/E 12.3, Market Cap $45B</p>
-            <p><strong>1-Year Performance:</strong> -8.7%</p>
-          </div>
-        </div>
-        
-        <!-- Baidu -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>Baidu (BIDU)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NASDAQ:BIDU",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>Baidu is China's leading search engine company that has expanded into AI, autonomous driving, and cloud computing. Its Apollo autonomous driving platform is considered a leader in China's smart transportation sector.</p>
-            <p><strong>Sector:</strong> Communication Services</p>
-            <p><strong>Key Metrics:</strong> P/E 14.5, Market Cap $35B</p>
-            <p><strong>1-Year Performance:</strong> -15.2%</p>
-          </div>
-        </div>
-        
-        <!-- Tesla -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>Tesla (TSLA)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NASDAQ:TSLA",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>Tesla is the market leader in electric vehicles and energy storage systems. The company continues to innovate in battery technology and autonomous driving while expanding production capacity globally.</p>
-            <p><strong>Sector:</strong> Consumer Discretionary</p>
-            <p><strong>Key Metrics:</strong> P/E 65.3, Market Cap $600B</p>
-            <p><strong>1-Year Performance:</strong> +58.9%</p>
-          </div>
-        </div>
-        
-        <!-- Microsoft -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>Microsoft (MSFT)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NASDAQ:MSFT",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>Microsoft is a technology leader in cloud computing (Azure), productivity software (Office), and enterprise solutions. Its diversified business model and strong cash flows make it a core holding in tech portfolios.</p>
-            <p><strong>Sector:</strong> Information Technology</p>
-            <p><strong>Key Metrics:</strong> P/E 32.7, Div Yield 0.7%, Market Cap $2.1T</p>
-            <p><strong>1-Year Performance:</strong> +32.4%</p>
-          </div>
-        </div>
-        
-        <!-- Amazon -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>Amazon (AMZN)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NASDAQ:AMZN",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>Amazon dominates e-commerce and cloud computing through AWS. The company continues to invest in logistics, healthcare, and advertising while improving profitability across its segments.</p>
-            <p><strong>Sector:</strong> Consumer Discretionary</p>
-            <p><strong>Key Metrics:</strong> P/E 52.4, Market Cap $1.5T</p>
-            <p><strong>1-Year Performance:</strong> +45.6%</p>
-          </div>
-        </div>
-        
-        <!-- Nvidia -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>Nvidia (NVDA)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NASDAQ:NVDA",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>Nvidia is the leading designer of GPUs for gaming, professional visualization, data centers, and automotive markets. Its chips are essential for AI, machine learning, and the metaverse.</p>
-            <p><strong>Sector:</strong> Information Technology</p>
-            <p><strong>Key Metrics:</strong> P/E 42.8, Market Cap $1.1T</p>
-            <p><strong>1-Year Performance:</strong> +189.2%</p>
-          </div>
-        </div>
-        
-        <!-- Berkshire Hathaway -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>Berkshire Hathaway (BRK.B)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NYSE:BRK.B",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>Warren Buffett's conglomerate owns businesses across insurance, railroads, utilities, manufacturing and holds a massive stock portfolio. Known for its value investing approach and strong capital allocation.</p>
-            <p><strong>Sector:</strong> Financials</p>
-            <p><strong>Key Metrics:</strong> P/E 9.2, Market Cap $650B</p>
-            <p><strong>1-Year Performance:</strong> +22.1%</p>
-          </div>
-        </div>
-        
-        <!-- First Solar -->
-        <div class="col-lg-6">
-          <div class="stock-card">
-            <h3>First Solar (FSLR)</h3>
-            <div class="stock-chart">
-              <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                  "symbol": "NASDAQ:FSLR",
-                  "width": "100%",
-                  "height": "100%",
-                  "locale": "en",
-                  "dateRange": "12M",
-                  "colorTheme": "light",
-                  "isTransparent": false,
-                  "autosize": true,
-                  "largeChartUrl": ""
-                }
-                </script>
-              </div>
-            </div>
-            <p>First Solar is a leading American solar technology company and global provider of comprehensive PV solar solutions. The company is benefiting from the global shift to renewable energy and favorable government policies.</p>
-            <p><strong>Sector:</strong> Technology</p>
-            <p><strong>Key Metrics:</strong> P/E 19.8, Market Cap $8.5B</p>
-            <p><strong>1-Year Performance:</strong> -3.4%</p>
-          </div>
-        </div>
-        
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="row g-4">
-        <!-- Company Info -->
-        <div class="col-md-4 text-center text-md-start">
-          <h5 class="mb-3">Ingram Capital</h5>
-          <p class="small">Delivering superior risk-adjusted returns through disciplined investment strategies.</p>
-          <div class="mt-3">
-            <a href="mailto:investor.relations@ingramcapital.com" class="d-block text-white-50 small">
-              <i class="fas fa-envelope me-2"></i>ing.matteo.bs@gmail.com
-            </a>
-          </div>
-        </div>
-
-        <!-- Quick Links -->
-        <div class="col-md-4 text-center">
-          <h5 class="mb-3">Quick Links</h5>
-          <ul class="list-unstyled">
-            <li class="mb-2"><a href="Index.html" class="text-white-50">Home</a></li>
-            <li class="mb-2"><a href="#strategies" class="text-white-50">Investment Strategies</a></li>
-            <li class="mb-2"><a href="#performance" class="text-white-50">Performance</a></li>
-            <li class="mb-2"><a href="#about" class="text-white-50">About Us</a></li>
-          </ul>
-        </div>
-
-        <!-- Social Media -->
-        <div class="col-md-4 text-center text-md-end">
-          <h5 class="mb-3">Connect With Us</h5>
-          <div class="social-links">
-            <a href="https://www.linkedin.com/in/matteo-ingram/" target="_blank" class="text-white-50 me-3">
-              <i class="fab fa-linkedin fa-lg"></i>
-            </a>
-            <a href="https://x.com/matteooffical" target="_blank" class="text-white-50 me-3">
-              <i class="fab fa-twitter fa-lg"></i>
-            </a>
-          </div>
-          <div class="mt-4">
-            <a href="#" class="btn btn-outline-light btn-sm">Investor Login</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Copyright -->
-      <div class="row mt-5">
-        <div class="col-12 text-center">
-          <hr class="mb-4 opacity-25">
-          <p class="small mb-0 text-white-50">
-            &copy; 2025 Ingram Capital Management. All rights reserved.<br>
-            <a href="#" class="text-white-50">Privacy Policy</a> | 
-            <a href="#" class="text-white-50">Terms of Service</a> | 
-            <a href="#" class="text-white-50">Disclosures</a>
-          </p>
-        </div>
-      </div>
-
-      <!-- Back to Top -->
-      <a href="#" class="btn btn-primary back-to-top">
-        <i class="fas fa-arrow-up"></i>
-      </a>
-    </div>
-  </footer>
-
-  <!-- Bootstrap 5 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- Back to Top Script -->
-  <script>
-    // Show/hide back to top button
-    window.addEventListener('scroll', function() {
-      const backToTop = document.querySelector('.back-to-top');
-      if (window.pageYOffset > 300) {
-        backToTop.style.display = 'block';
-      } else {
-        backToTop.style.display = 'none';
-      }
-    });
-
-    // Smooth scroll for all navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      });
-    });
-  </script>
 </body>
 </html>
