@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Options Payoff — Strategy Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#ffffff;
+  --surface:#f7f7f5;
+  --surface2:#efefec;
+  --border:rgba(0,0,0,0.09);
+  --border-md:rgba(0,0,0,0.15);
+  --text:#111111;
+  --muted:#999;
+  --muted2:#bbb;
+  --green:#16a34a;
+  --red:#dc2626;
+  --green-fill:rgba(22,163,74,0.08);
+  --red-fill:rgba(220,38,38,0.08);
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh;line-height:1.6}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;
+  padding:0 2rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.95);
+  backdrop-filter:blur(12px);
+}
+.nav-back{
+  font-family:var(--mono);font-size:0.625rem;font-weight:300;
+  letter-spacing:0.1em;color:var(--muted2);
+  text-decoration:none;transition:color 0.15s;
+}
+.nav-back:hover{color:var(--text)}
+.nav-title{
+  font-family:'EB Garamond',Georgia,serif;
+  font-size:0.94rem;font-weight:400;
+  letter-spacing:0.04em;color:var(--muted);
+}
+.nav-year{
+  font-family:var(--mono);font-size:0.625rem;font-weight:300;
+  color:var(--muted2);letter-spacing:0.08em;
+}
+
+main{max-width:900px;margin:0 auto;padding:5.5rem 2rem 6rem}
+
+/* HEADER */
+.page-header{margin-bottom:2.5rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border)}
+.page-tag{font-family:var(--mono);font-size:0.66rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.6rem}
+h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
+.page-sub{font-size:0.82rem;color:var(--muted);font-family:var(--mono)}
+
+/* SECTION LABEL */
+.sec-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+
+/* LEGS TABLE */
+#legs-table{width:100%;border-collapse:collapse;border:1px solid var(--border);margin-bottom:0}
+#legs-table th{font-family:var(--mono);font-size:0.63rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:0.65rem 0.9rem;border-bottom:1px solid var(--border);background:var(--surface);text-align:left;font-weight:400}
+#legs-table td{padding:0 0.25rem;border-bottom:1px solid var(--border);vertical-align:middle;background:white}
+#legs-table tr:last-child td{border-bottom:none}
+#legs-table td:first-child{padding-left:0.6rem}
+#legs-table td:last-child{padding-right:0.6rem;text-align:right}
+
+/* INLINE INPUTS */
+.cell-input{
+  width:100%;background:transparent;border:none;outline:none;
+  font-family:var(--mono);font-size:0.88rem;color:var(--text);
+  padding:0.7rem 0.5rem;
+}
+.cell-input::placeholder{color:var(--muted2)}
+
+/* SELECT */
+.cell-select{
+  width:100%;background:transparent;border:none;outline:none;
+  font-family:var(--mono);font-size:0.82rem;color:var(--text);
+  padding:0.7rem 0.5rem;cursor:pointer;-webkit-appearance:none;appearance:none;
+}
+
+/* TYPE TOGGLE — CALL / PUT / STOCK */
+.type-toggle{display:flex;gap:0}
+.type-btn{
+  background:transparent;border:1px solid var(--border);
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.06em;
+  padding:0.28rem 0.55rem;cursor:pointer;color:var(--muted);
+  transition:all 0.15s;border-right:none;
+}
+.type-btn:last-child{border-right:1px solid var(--border)}
+.type-btn.active-call{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd}
+.type-btn.active-put{background:#fff1f2;color:#be123c;border-color:#fda4af}
+.type-btn.active-stock{background:#f0fdf4;color:#15803d;border-color:#86efac}
+
+/* DIRECTION */
+.dir-toggle{display:flex;gap:0}
+.dir-btn{
+  background:transparent;border:1px solid var(--border);
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.06em;
+  padding:0.28rem 0.55rem;cursor:pointer;color:var(--muted);
+  transition:all 0.15s;border-right:none;
+}
+.dir-btn:last-child{border-right:1px solid var(--border)}
+.dir-btn.active-long{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.dir-btn.active-short{background:#fff1f2;color:#be123c;border-color:#fda4af}
+
+/* DELETE BTN */
+.del-btn{
+  background:transparent;border:none;cursor:pointer;
+  color:var(--muted2);font-size:1rem;padding:0 0.4rem;
+  transition:color 0.15s;line-height:1;
+}
+.del-btn:hover{color:var(--red)}
+
+/* ACTION ROW */
+.action-row{display:flex;gap:0.75rem;margin-top:1.25rem;align-items:center;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:transparent;border:1px solid var(--border-md);
+  color:var(--text);font-family:var(--mono);font-size:0.74rem;
+  letter-spacing:0.06em;padding:0.6rem 1.25rem;cursor:pointer;
+  transition:background 0.15s,border-color 0.15s;
+}
+.btn:hover{background:var(--surface);border-color:rgba(0,0,0,0.25)}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:var(--text);color:white;border-color:var(--text)}
+.btn-primary:hover{background:#333;border-color:#333}
+.btn-primary .arrow{transition:transform 0.15s}
+.btn-primary:hover .arrow{transform:translateX(3px)}
+.btn-ghost{color:var(--muted);border-color:var(--border)}
+.btn-ghost:hover{color:var(--text);background:var(--surface)}
+
+/* ERROR */
+.error-msg{display:none;font-family:var(--mono);font-size:0.76rem;color:var(--red);margin-top:0.75rem;padding:0.6rem 1rem;border:1px solid rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)}
+
+/* RESULTS */
+#results{display:none;animation:fadeUp 0.35s ease both;margin-top:2.5rem}
+#results.visible{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);margin-bottom:2rem}
+.metric{padding:1.1rem 1.25rem;border-right:1px solid var(--border)}
+.metric:last-child{border-right:none}
+.metric-label{font-family:var(--mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem}
+.metric-value{font-family:var(--mono);font-size:1.35rem;font-weight:400;letter-spacing:-0.02em}
+.mv-green{color:var(--green)}.mv-red{color:var(--red)}.mv-neutral{color:var(--text)}
+
+/* CHART */
+.chart-wrap{border:1px solid var(--border);background:white;padding:1.25rem 1.25rem 1rem;margin-bottom:2rem}
+.chart-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem}
+.chart-title{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.chart-legend{display:flex;gap:1rem;font-family:var(--mono);font-size:0.63rem;color:var(--muted)}
+.ldot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px;vertical-align:middle}
+#chartContainer{position:relative;height:280px}
+
+/* DETAIL */
+.detail-wrap{border:1px solid var(--border);margin-bottom:2rem}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;font-family:var(--mono);font-size:0.78rem;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.dk{color:var(--muted)}.dv{color:var(--text)}.dv-g{color:var(--green)}.dv-r{color:var(--red)}
+
+/* LEGS SUMMARY */
+.legs-summary{border:1px solid var(--border);margin-bottom:2rem}
+.leg-summary-row{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1.1rem;font-family:var(--mono);font-size:0.73rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.leg-summary-row:last-child{border-bottom:none}
+.leg-badge{display:inline-block;padding:0.15rem 0.45rem;font-size:0.6rem;letter-spacing:0.06em;border-radius:2px}
+.badge-call{background:#eff6ff;color:#1d4ed8}
+.badge-put{background:#fff1f2;color:#be123c}
+.badge-stock{background:#f0fdf4;color:#15803d}
+.badge-long{background:#f0fdf4;color:#15803d}
+.badge-short{background:#fff1f2;color:#be123c}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .metric:nth-child(2){border-right:none}
+  .metric:nth-child(n+3){border-top:1px solid var(--border)}
+  nav{padding:1rem 1.25rem}
+  main{padding:4.5rem 1.25rem 5rem}
+  #legs-table th:nth-child(6),#legs-table td:nth-child(6){display:none}
+}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.68rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="https://matteoingram.github.io/Ingram/index.html">Matteo Martin Ingram</a>
+  <span class="nav-title">Options Payoff Builder</span>
+  <span class="nav-year">2026</span>
+</nav>
+
+<main>
+
+  <header class="page-header">
+    <div class="page-tag">Finance · Options Strategy</div>
+    <h1>Payoff Builder</h1>
+    <div class="page-sub">Add any combination of calls, puts and stock positions — get the payoff at expiry</div>
+  </header>
+
+  <!-- LEGS -->
+  <section style="margin-bottom:2rem">
+    <div class="sec-label">Legs</div>
+    <table id="legs-table">
+      <thead>
+        <tr>
+          <th style="width:38px">#</th>
+          <th style="width:130px">Type</th>
+          <th style="width:110px">Direction</th>
+          <th>Strike / Price</th>
+          <th>Premium / Cost</th>
+          <th style="width:60px">Qty</th>
+          <th style="width:32px"></th>
+        </tr>
+      </thead>
+      <tbody id="legs-body"></tbody>
+    </table>
+
+    <div class="action-row">
+      <button class="btn btn-ghost" onclick="addLeg()">+ Add leg</button>
+      <button class="btn btn-ghost" onclick="clearAll()">Clear all</button>
+
+      <div style="display:flex;gap:0.5rem;margin-left:auto;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);align-self:center;letter-spacing:0.06em">PRESETS:</span>
+        <button class="btn btn-ghost" onclick="loadPreset('butterfly')">Butterfly</button>
+        <button class="btn btn-ghost" onclick="loadPreset('straddle')">Straddle</button>
+        <button class="btn btn-ghost" onclick="loadPreset('strangle')">Strangle</button>
+        <button class="btn btn-ghost" onclick="loadPreset('protective_put')">Protective put</button>
+        <button class="btn btn-ghost" onclick="loadPreset('bull_spread')">Bull spread</button>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="action-row" style="margin-top:1.5rem">
+      <button class="btn btn-primary" onclick="runAnalysis()">
+        Run analysis <span class="arrow">→</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results">
+
+    <div class="sec-label">Summary</div>
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-label">Net Premium</div><div class="metric-value mv-neutral" id="mNet">—</div></div>
+      <div class="metric"><div class="metric-label">Max Profit</div><div class="metric-value mv-green" id="mMaxP">—</div></div>
+      <div class="metric"><div class="metric-label">Max Loss</div><div class="metric-value mv-red" id="mMaxL">—</div></div>
+      <div class="metric"><div class="metric-label">Breakeven(s)</div><div class="metric-value mv-neutral" id="mBE" style="font-size:0.95rem;line-height:1.4">—</div></div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <span class="chart-title">Payoff at expiry</span>
+        <div class="chart-legend">
+          <span><span class="ldot" style="background:#16a34a"></span>profit</span>
+          <span><span class="ldot" style="background:#dc2626"></span>loss</span>
+        </div>
+      </div>
+      <div id="chartContainer">
+        <canvas id="bfChart" role="img" aria-label="Options strategy payoff diagram"></canvas>
+      </div>
+    </div>
+
+    <div class="sec-label">Legs used</div>
+    <div class="legs-summary" id="legsSummary"></div>
+
+    <div class="sec-label">Detail</div>
+    <div class="detail-wrap" id="detailWrap"></div>
+
+  </section>
+
+</main>
+
+<footer>
+  <span>Options Payoff Builder</span>
+  <span>2026</span>
+</footer>
+
+<script>
+/* ── STATE ── */
+let legs = [];
+let legCounter = 0;
+let chart = null;
+
+/* ── PRESETS ── */
+const PRESETS = {
+  butterfly: [
+    {type:'call',dir:'long',strike:90,premium:12,qty:1},
+    {type:'call',dir:'short',strike:100,premium:7,qty:2},
+    {type:'call',dir:'long',strike:110,premium:3,qty:1},
+  ],
+  straddle: [
+    {type:'call',dir:'long',strike:100,premium:8,qty:1},
+    {type:'put',dir:'long',strike:100,premium:7,qty:1},
+  ],
+  strangle: [
+    {type:'call',dir:'long',strike:110,premium:5,qty:1},
+    {type:'put',dir:'long',strike:90,premium:4,qty:1},
+  ],
+  protective_put: [
+    {type:'stock',dir:'long',strike:100,premium:0,qty:1},
+    {type:'put',dir:'long',strike:95,premium:3,qty:1},
+  ],
+  bull_spread: [
+    {type:'call',dir:'long',strike:95,premium:8,qty:1},
+    {type:'call',dir:'short',strike:105,premium:3,qty:1},
+  ],
+};
+
+/* ── LEG ROW RENDERING ── */
+function renderLegs() {
+  const tbody = document.getElementById('legs-body');
+  tbody.innerHTML = '';
+  legs.forEach((leg, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="padding-left:0.9rem;font-family:var(--mono);font-size:0.7rem;color:var(--muted)">${i+1}</td>
+      <td>
+        <div class="type-toggle" id="type-toggle-${leg.id}">
+          <button class="type-btn ${leg.type==='call'?'active-call':''}" onclick="setType(${leg.id},'call')">CALL</button>
+          <button class="type-btn ${leg.type==='put'?'active-put':''}" onclick="setType(${leg.id},'put')">PUT</button>
+          <button class="type-btn ${leg.type==='stock'?'active-stock':''}" onclick="setType(${leg.id},'stock')">STK</button>
+        </div>
+      </td>
+      <td>
+        <div class="dir-toggle">
+          <button class="dir-btn ${leg.dir==='long'?'active-long':''}" onclick="setDir(${leg.id},'long')">LONG</button>
+          <button class="dir-btn ${leg.dir==='short'?'active-short':''}" onclick="setDir(${leg.id},'short')">SHORT</button>
+        </div>
+      </td>
+      <td>
+        <input class="cell-input" type="number" placeholder="${leg.type==='stock'?'entry price':'strike'}" value="${leg.strike||''}" oninput="setVal(${leg.id},'strike',this.value)" step="any"/>
+      </td>
+      <td>
+        <input class="cell-input" type="number" placeholder="${leg.type==='stock'?'0':'premium'}" value="${leg.premium||''}" oninput="setVal(${leg.id},'premium',this.value)" step="any" ${leg.type==='stock'?'style="color:var(--muted2)"':''}/>
+      </td>
+      <td>
+        <input class="cell-input" type="number" placeholder="1" value="${leg.qty||1}" oninput="setVal(${leg.id},'qty',this.value)" min="1" step="1" style="width:50px"/>
+      </td>
+      <td>
+        <button class="del-btn" onclick="removeLeg(${leg.id})" title="Remove">×</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function addLeg(preset) {
+  legCounter++;
+  legs.push({
+    id: legCounter,
+    type: preset?.type || 'call',
+    dir: preset?.dir || 'long',
+    strike: preset?.strike || '',
+    premium: preset?.premium ?? '',
+    qty: preset?.qty || 1,
+  });
+  renderLegs();
+}
+
+function removeLeg(id) {
+  legs = legs.filter(l => l.id !== id);
+  renderLegs();
+}
+
+function setType(id, type) {
+  const l = legs.find(l => l.id === id);
+  if (l) { l.type = type; renderLegs(); }
+}
+function setDir(id, dir) {
+  const l = legs.find(l => l.id === id);
+  if (l) { l.dir = dir; renderLegs(); }
+}
+function setVal(id, field, val) {
+  const l = legs.find(l => l.id === id);
+  if (l) l[field] = val === '' ? '' : parseFloat(val);
+}
+
+function clearAll() {
+  legs = []; legCounter = 0;
+  renderLegs();
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').classList.remove('visible');
+}
+
+function loadPreset(name) {
+  legs = []; legCounter = 0;
+  PRESETS[name].forEach(p => addLeg(p));
+}
+
+/* ── PAYOFF CALC ── */
+function legPayoff(leg, S) {
+  const dir = leg.dir === 'long' ? 1 : -1;
+  const q = leg.qty || 1;
+  const strike = parseFloat(leg.strike);
+  const premium = parseFloat(leg.premium) || 0;
+
+  if (leg.type === 'call') {
+    return dir * q * (Math.max(0, S - strike) - premium);
+  } else if (leg.type === 'put') {
+    return dir * q * (Math.max(0, strike - S) - premium);
+  } else { // stock
+    return dir * q * (S - strike); // P&L relative to entry
+  }
+}
+
+function totalPayoff(S) {
+  return legs.reduce((sum, leg) => sum + legPayoff(leg, S), 0);
+}
+
+/* ── ANALYSIS ── */
+function runAnalysis() {
+  const errEl = document.getElementById('errorMsg');
+
+  if (legs.length === 0) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Error — add at least one leg before running.';
+    return;
+  }
+
+  for (const leg of legs) {
+    const s = parseFloat(leg.strike);
+    if (isNaN(s) || s <= 0) {
+      errEl.style.display = 'block';
+      errEl.textContent = `Error — leg ${legs.indexOf(leg)+1} has an invalid strike/price.`;
+      return;
+    }
+    const qty = parseFloat(leg.qty);
+    if (isNaN(qty) || qty <= 0) {
+      errEl.style.display = 'block';
+      errEl.textContent = `Error — leg ${legs.indexOf(leg)+1} has an invalid quantity.`;
+      return;
+    }
+  }
+  errEl.style.display = 'none';
+
+  // Price range
+  const strikes = legs.map(l => parseFloat(l.strike)).filter(s => !isNaN(s));
+  const minS = Math.min(...strikes);
+  const maxS = Math.max(...strikes);
+  const spread = maxS - minS || minS;
+  const lo = Math.max(0.01, minS - spread * 0.6);
+  const hi = maxS + spread * 0.6;
+  const steps = 400;
+  const step = (hi - lo) / steps;
+
+  const prices = [], pnls = [];
+  for (let i = 0; i <= steps; i++) {
+    const S = lo + i * step;
+    prices.push(parseFloat(S.toFixed(4)));
+    pnls.push(parseFloat(totalPayoff(S).toFixed(4)));
+  }
+
+  // Metrics
+  const netPremium = legs.reduce((sum, leg) => {
+    const p = parseFloat(leg.premium) || 0;
+    const q = parseFloat(leg.qty) || 1;
+    return sum + (leg.type !== 'stock' ? (leg.dir === 'long' ? -1 : 1) * p * q : 0);
+  }, 0);
+
+  // Breakevens (zero crossings)
+  const breakevens = [];
+  for (let i = 0; i < pnls.length - 1; i++) {
+    if ((pnls[i] < 0 && pnls[i+1] >= 0) || (pnls[i] >= 0 && pnls[i+1] < 0)) {
+      const frac = -pnls[i] / (pnls[i+1] - pnls[i]);
+      breakevens.push(prices[i] + frac * (prices[i+1] - prices[i]));
+    }
+  }
+
+  // Analytically compute slope of total payoff as S→∞ and S→0+
+  // For a call: slope at S→∞ = dir*qty, slope at S→0 = 0
+  // For a put:  slope at S→∞ = 0,       slope at S→0 = -dir*qty (put gains as S falls)
+  // For stock:  slope at S→∞ = dir*qty,  slope at S→0 = dir*qty
+  function slopeAtInfinity() {
+    return legs.reduce((s, leg) => {
+      const dir = leg.dir === 'long' ? 1 : -1;
+      const q = parseFloat(leg.qty) || 1;
+      if (leg.type === 'call' || leg.type === 'stock') return s + dir * q;
+      return s; // puts have zero slope at infinity
+    }, 0);
+  }
+  function slopeAtZero() {
+    return legs.reduce((s, leg) => {
+      const dir = leg.dir === 'long' ? 1 : -1;
+      const q = parseFloat(leg.qty) || 1;
+      if (leg.type === 'put') return s - dir * q; // put payoff rises as S→0
+      if (leg.type === 'stock') return s + dir * q;
+      return s; // calls have zero slope at zero
+    }, 0);
+  }
+
+  const upSlope   = slopeAtInfinity();   // net delta above all strikes
+  const downSlope = slopeAtZero();        // net delta below all strikes
+
+  // Truly unbounded upside: slope > 0 as S→∞
+  // Truly unbounded downside: slope < 0 as S→0 (i.e. value keeps falling as price falls)
+  const isMaxUnbounded = upSlope > 0;
+  const isMinUnbounded = downSlope < 0;
+
+  // True max/min: from sampled range only when bounded
+  const trueMax = isMaxUnbounded ? Infinity  : Math.max(...pnls);
+  const trueMin = isMinUnbounded ? -Infinity : Math.min(...pnls);
+
+  // Update cards
+  const npEl = document.getElementById('mNet');
+  npEl.textContent = (netPremium >= 0 ? '+' : '') + netPremium.toFixed(2);
+  npEl.className = 'metric-value ' + (netPremium >= 0 ? 'mv-green' : 'mv-red');
+
+  document.getElementById('mMaxP').textContent = isMaxUnbounded ? '∞ (unlimited)' : (trueMax >= 0 ? '+' : '') + trueMax.toFixed(2);
+  document.getElementById('mMaxL').textContent = isMinUnbounded ? '−∞ (unlimited)' : trueMin.toFixed(2);
+  document.getElementById('mBE').textContent = breakevens.length
+    ? breakevens.map(b => b.toFixed(2)).join('\n')
+    : 'none in range';
+
+  // Chart
+  if (chart) { chart.destroy(); chart = null; }
+  chart = new Chart(document.getElementById('bfChart'), {
+    type: 'line',
+    data: {
+      labels: prices,
+      datasets: [{
+        label: 'P&L',
+        data: pnls,
+        borderColor: '#555',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0,
+        fill: {target:{value:0}, above:'rgba(22,163,74,0.1)', below:'rgba(220,38,38,0.1)'}
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'white',
+          borderColor:'rgba(0,0,0,0.1)',
+          borderWidth:1,
+          titleColor:'#999',
+          bodyColor:'#111',
+          titleFont:{family:'DM Mono',size:10},
+          bodyFont:{family:'DM Mono',size:12},
+          padding:10,
+          callbacks:{
+            title: ctx => 'Price: ' + parseFloat(ctx[0].label).toFixed(2),
+            label: ctx => 'P&L:  ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw.toFixed(2)
+          }
+        }
+      },
+      scales:{
+        x:{
+          type:'linear',
+          ticks:{color:'#bbb',font:{family:'DM Mono',size:10},maxTicksLimit:9,callback:v=>v.toFixed(0)},
+          grid:{color:'rgba(0,0,0,0.04)'},
+          border:{color:'rgba(0,0,0,0.1)'}
+        },
+        y:{
+          ticks:{color:'#bbb',font:{family:'DM Mono',size:10},callback:v=>(v>=0?'+':'')+v.toFixed(1)},
+          grid:{color:'rgba(0,0,0,0.04)'},
+          border:{color:'rgba(0,0,0,0.1)'}
+        }
+      }
+    }
+  });
+
+  // Legs summary
+  const ls = document.getElementById('legsSummary');
+  ls.innerHTML = legs.map((leg, i) => {
+    const typeBadge = `<span class="leg-badge badge-${leg.type}">${leg.type.toUpperCase()}</span>`;
+    const dirBadge  = `<span class="leg-badge badge-${leg.dir}">${leg.dir.toUpperCase()}</span>`;
+    const qty = leg.qty || 1;
+    const strike = parseFloat(leg.strike).toFixed(2);
+    const premium = leg.type !== 'stock' ? ` · premium ${parseFloat(leg.premium||0).toFixed(2)}` : '';
+    return `<div class="leg-summary-row">
+      <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);min-width:16px">${i+1}</span>
+      ${typeBadge} ${dirBadge}
+      <span style="color:var(--text)">×${qty}</span>
+      <span style="color:var(--muted)">strike ${strike}${premium}</span>
+    </div>`;
+  }).join('');
+
+  // Detail
+  const dw = document.getElementById('detailWrap');
+  const rows = [
+    ['Strategy legs', legs.length + ' leg' + (legs.length!==1?'s':''),'dv'],
+    ['Net premium', (netPremium>=0?'+':'')+netPremium.toFixed(2), netPremium>=0?'dv-g':'dv-r'],
+    ['Max profit', isMaxUnbounded ? '∞ (unlimited upside)' : (trueMax>=0?'+':'')+trueMax.toFixed(2), 'dv-g'],
+    ['Max loss', isMinUnbounded ? '−∞ (unlimited downside)' : trueMin.toFixed(2), 'dv-r'],
+    ...breakevens.map((b,i) => [`Breakeven ${breakevens.length>1?i+1:''}`.trim(), b.toFixed(2), 'dv']),
+    ['Price range shown', lo.toFixed(2) + ' — ' + hi.toFixed(2), 'dv'],
+  ];
+  dw.innerHTML = rows.map(([k,v,cls]) => `
+    <div class="detail-row">
+      <span class="dk">${k}</span>
+      <span class="${cls}" style="font-family:var(--mono);font-size:0.78rem">${v}</span>
+    </div>`).join('');
+
+  // Show
+  const res = document.getElementById('results');
+  res.classList.remove('visible');
+  void res.offsetWidth;
+  res.classList.add('visible');
+  res.style.display = 'block';
+  setTimeout(() => res.scrollIntoView({behavior:'smooth',block:'start'}), 50);
+}
+
+// Enter key
+document.addEventListener('keydown', e => { if (e.key === 'Enter') runAnalysis(); });
+
+// Init with butterfly
+loadPreset('butterfly');
+</script>
+</body>
+</html>
