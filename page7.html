@@ -29,44 +29,27 @@
 
 html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh;line-height:1.6}
 
-/* NAV */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  height:56px;
-  padding:0 2rem;
+  height:56px;padding:0 2rem;
   border-bottom:1px solid var(--border);
-  background:rgba(255,255,255,0.95);
-  backdrop-filter:blur(12px);
+  background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);
 }
-.nav-back{
-  font-family:var(--mono);font-size:0.625rem;font-weight:300;
-  letter-spacing:0.1em;color:var(--muted2);
-  text-decoration:none;transition:color 0.15s;
-}
+.nav-back{font-family:var(--mono);font-size:0.625rem;font-weight:300;letter-spacing:0.1em;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
 .nav-back:hover{color:var(--text)}
-.nav-title{
-  font-family:'EB Garamond',Georgia,serif;
-  font-size:0.94rem;font-weight:400;
-  letter-spacing:0.04em;color:var(--muted);
-}
-.nav-year{
-  font-family:var(--mono);font-size:0.625rem;font-weight:300;
-  color:var(--muted2);letter-spacing:0.08em;
-}
+.nav-title{font-family:'EB Garamond',Georgia,serif;font-size:0.94rem;font-weight:400;letter-spacing:0.04em;color:var(--muted);}
+.nav-year{font-family:var(--mono);font-size:0.625rem;font-weight:300;color:var(--muted2);letter-spacing:0.08em;}
 
 main{max-width:900px;margin:0 auto;padding:5.5rem 2rem 6rem}
 
-/* HEADER */
 .page-header{margin-bottom:2.5rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border)}
 .page-tag{font-family:var(--mono);font-size:0.66rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.6rem}
 h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
 .page-sub{font-size:0.82rem;color:var(--muted);font-family:var(--mono)}
 
-/* SECTION LABEL */
 .sec-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
 
-/* LEGS TABLE */
 #legs-table{width:100%;border-collapse:collapse;border:1px solid var(--border);margin-bottom:0}
 #legs-table th{font-family:var(--mono);font-size:0.63rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:0.65rem 0.9rem;border-bottom:1px solid var(--border);background:var(--surface);text-align:left;font-weight:400}
 #legs-table td{padding:0 0.25rem;border-bottom:1px solid var(--border);vertical-align:middle;background:white}
@@ -74,63 +57,29 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 #legs-table td:first-child{padding-left:0.6rem}
 #legs-table td:last-child{padding-right:0.6rem;text-align:right}
 
-/* INLINE INPUTS */
-.cell-input{
-  width:100%;background:transparent;border:none;outline:none;
-  font-family:var(--mono);font-size:0.88rem;color:var(--text);
-  padding:0.7rem 0.5rem;
-}
+.cell-input{width:100%;background:transparent;border:none;outline:none;font-family:var(--mono);font-size:0.88rem;color:var(--text);padding:0.7rem 0.5rem;}
 .cell-input::placeholder{color:var(--muted2)}
 
-/* SELECT */
-.cell-select{
-  width:100%;background:transparent;border:none;outline:none;
-  font-family:var(--mono);font-size:0.82rem;color:var(--text);
-  padding:0.7rem 0.5rem;cursor:pointer;-webkit-appearance:none;appearance:none;
-}
+.cell-select{width:100%;background:transparent;border:none;outline:none;font-family:var(--mono);font-size:0.82rem;color:var(--text);padding:0.7rem 0.5rem;cursor:pointer;-webkit-appearance:none;appearance:none;}
 
-/* TYPE TOGGLE — CALL / PUT / STOCK */
 .type-toggle{display:flex;gap:0}
-.type-btn{
-  background:transparent;border:1px solid var(--border);
-  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.06em;
-  padding:0.28rem 0.55rem;cursor:pointer;color:var(--muted);
-  transition:all 0.15s;border-right:none;
-}
+.type-btn{background:transparent;border:1px solid var(--border);font-family:var(--mono);font-size:0.65rem;letter-spacing:0.06em;padding:0.28rem 0.55rem;cursor:pointer;color:var(--muted);transition:all 0.15s;border-right:none;}
 .type-btn:last-child{border-right:1px solid var(--border)}
 .type-btn.active-call{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd}
 .type-btn.active-put{background:#fff1f2;color:#be123c;border-color:#fda4af}
 .type-btn.active-stock{background:#f0fdf4;color:#15803d;border-color:#86efac}
 
-/* DIRECTION */
 .dir-toggle{display:flex;gap:0}
-.dir-btn{
-  background:transparent;border:1px solid var(--border);
-  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.06em;
-  padding:0.28rem 0.55rem;cursor:pointer;color:var(--muted);
-  transition:all 0.15s;border-right:none;
-}
+.dir-btn{background:transparent;border:1px solid var(--border);font-family:var(--mono);font-size:0.65rem;letter-spacing:0.06em;padding:0.28rem 0.55rem;cursor:pointer;color:var(--muted);transition:all 0.15s;border-right:none;}
 .dir-btn:last-child{border-right:1px solid var(--border)}
 .dir-btn.active-long{background:#f0fdf4;color:#15803d;border-color:#86efac}
 .dir-btn.active-short{background:#fff1f2;color:#be123c;border-color:#fda4af}
 
-/* DELETE BTN */
-.del-btn{
-  background:transparent;border:none;cursor:pointer;
-  color:var(--muted2);font-size:1rem;padding:0 0.4rem;
-  transition:color 0.15s;line-height:1;
-}
+.del-btn{background:transparent;border:none;cursor:pointer;color:var(--muted2);font-size:1rem;padding:0 0.4rem;transition:color 0.15s;line-height:1;}
 .del-btn:hover{color:var(--red)}
 
-/* ACTION ROW */
 .action-row{display:flex;gap:0.75rem;margin-top:1.25rem;align-items:center;flex-wrap:wrap}
-.btn{
-  display:inline-flex;align-items:center;gap:0.4rem;
-  background:transparent;border:1px solid var(--border-md);
-  color:var(--text);font-family:var(--mono);font-size:0.74rem;
-  letter-spacing:0.06em;padding:0.6rem 1.25rem;cursor:pointer;
-  transition:background 0.15s,border-color 0.15s;
-}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;background:transparent;border:1px solid var(--border-md);color:var(--text);font-family:var(--mono);font-size:0.74rem;letter-spacing:0.06em;padding:0.6rem 1.25rem;cursor:pointer;transition:background 0.15s,border-color 0.15s;}
 .btn:hover{background:var(--surface);border-color:rgba(0,0,0,0.25)}
 .btn:active{transform:scale(0.98)}
 .btn-primary{background:var(--text);color:white;border-color:var(--text)}
@@ -140,15 +89,12 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 .btn-ghost{color:var(--muted);border-color:var(--border)}
 .btn-ghost:hover{color:var(--text);background:var(--surface)}
 
-/* ERROR */
 .error-msg{display:none;font-family:var(--mono);font-size:0.76rem;color:var(--red);margin-top:0.75rem;padding:0.6rem 1rem;border:1px solid rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)}
 
-/* RESULTS */
 #results{display:none;animation:fadeUp 0.35s ease both;margin-top:2.5rem}
 #results.visible{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* METRICS */
 .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);margin-bottom:2rem}
 .metric{padding:1.1rem 1.25rem;border-right:1px solid var(--border)}
 .metric:last-child{border-right:none}
@@ -156,7 +102,6 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 .metric-value{font-family:var(--mono);font-size:1.35rem;font-weight:400;letter-spacing:-0.02em}
 .mv-green{color:var(--green)}.mv-red{color:var(--red)}.mv-neutral{color:var(--text)}
 
-/* CHART */
 .chart-wrap{border:1px solid var(--border);background:white;padding:1.25rem 1.25rem 1rem;margin-bottom:2rem}
 .chart-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem}
 .chart-title{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
@@ -164,13 +109,11 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 .ldot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px;vertical-align:middle}
 #chartContainer{position:relative;height:280px}
 
-/* DETAIL */
 .detail-wrap{border:1px solid var(--border);margin-bottom:2rem}
 .detail-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;font-family:var(--mono);font-size:0.78rem;border-bottom:1px solid var(--border)}
 .detail-row:last-child{border-bottom:none}
 .dk{color:var(--muted)}.dv{color:var(--text)}.dv-g{color:var(--green)}.dv-r{color:var(--red)}
 
-/* LEGS SUMMARY */
 .legs-summary{border:1px solid var(--border);margin-bottom:2rem}
 .leg-summary-row{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1.1rem;font-family:var(--mono);font-size:0.73rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .leg-summary-row:last-child{border-bottom:none}
@@ -181,7 +124,6 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 .badge-long{background:#f0fdf4;color:#15803d}
 .badge-short{background:#fff1f2;color:#be123c}
 
-/* RESPONSIVE */
 @media(max-width:640px){
   .metrics-grid{grid-template-columns:1fr 1fr}
   .metric:nth-child(2){border-right:none}
@@ -191,27 +133,24 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
   #legs-table th:nth-child(6),#legs-table td:nth-child(6){display:none}
 }
 
-/* FOOTER */
 footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.68rem;color:var(--muted)}
 </style>
 </head>
 <body>
 
 <nav>
-  <a class="nav-back" href="https://matteoingram.github.io/Ingram/index.html">Matteo Martin Ingram</a>
+  <a class="nav-back" href="#">Matteo Martin Ingram</a>
   <span class="nav-title">Options Payoff Builder</span>
   <span class="nav-year">2026</span>
 </nav>
 
 <main>
-
   <header class="page-header">
     <div class="page-tag">Finance · Options Strategy</div>
     <h1>Payoff Builder</h1>
     <div class="page-sub">Add any combination of calls, puts and stock positions — get the payoff at expiry</div>
   </header>
 
-  <!-- LEGS -->
   <section style="margin-bottom:2rem">
     <div class="sec-label">Legs</div>
     <table id="legs-table">
@@ -232,7 +171,6 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
     <div class="action-row">
       <button class="btn btn-ghost" onclick="addLeg()">+ Add leg</button>
       <button class="btn btn-ghost" onclick="clearAll()">Clear all</button>
-
       <div style="display:flex;gap:0.5rem;margin-left:auto;flex-wrap:wrap">
         <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);align-self:center;letter-spacing:0.06em">PRESETS:</span>
         <button class="btn btn-ghost" onclick="loadPreset('butterfly')">Butterfly</button>
@@ -252,9 +190,7 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
     </div>
   </section>
 
-  <!-- RESULTS -->
   <section id="results">
-
     <div class="sec-label">Summary</div>
     <div class="metrics-grid">
       <div class="metric"><div class="metric-label">Net Premium</div><div class="metric-value mv-neutral" id="mNet">—</div></div>
@@ -281,9 +217,7 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
 
     <div class="sec-label">Detail</div>
     <div class="detail-wrap" id="detailWrap"></div>
-
   </section>
-
 </main>
 
 <footer>
@@ -300,38 +234,39 @@ let chart = null;
 /* ── PRESETS ── */
 const PRESETS = {
   butterfly: [
-    {type:'call',dir:'long',strike:90,premium:12,qty:1},
-    {type:'call',dir:'short',strike:100,premium:7,qty:2},
-    {type:'call',dir:'long',strike:110,premium:3,qty:1},
+    {type:'call',dir:'long', strike:90,  premium:12, qty:1},
+    {type:'call',dir:'short',strike:100, premium:7,  qty:2},
+    {type:'call',dir:'long', strike:110, premium:3,  qty:1},
   ],
   straddle: [
     {type:'call',dir:'long',strike:100,premium:8,qty:1},
-    {type:'put',dir:'long',strike:100,premium:7,qty:1},
+    {type:'put', dir:'long',strike:100,premium:7,qty:1},
   ],
   strangle: [
     {type:'call',dir:'long',strike:110,premium:5,qty:1},
-    {type:'put',dir:'long',strike:90,premium:4,qty:1},
+    {type:'put', dir:'long',strike:90, premium:4,qty:1},
   ],
   protective_put: [
     {type:'stock',dir:'long',strike:100,premium:0,qty:1},
-    {type:'put',dir:'long',strike:95,premium:3,qty:1},
+    {type:'put',  dir:'long',strike:95, premium:3,qty:1},
   ],
   bull_spread: [
-    {type:'call',dir:'long',strike:95,premium:8,qty:1},
+    {type:'call',dir:'long', strike:95, premium:8,qty:1},
     {type:'call',dir:'short',strike:105,premium:3,qty:1},
   ],
 };
 
-/* ── LEG ROW RENDERING ── */
+/* ── LEG RENDERING ── */
 function renderLegs() {
   const tbody = document.getElementById('legs-body');
   tbody.innerHTML = '';
   legs.forEach((leg, i) => {
     const tr = document.createElement('tr');
+    const isStock = leg.type === 'stock';
     tr.innerHTML = `
       <td style="padding-left:0.9rem;font-family:var(--mono);font-size:0.7rem;color:var(--muted)">${i+1}</td>
       <td>
-        <div class="type-toggle" id="type-toggle-${leg.id}">
+        <div class="type-toggle">
           <button class="type-btn ${leg.type==='call'?'active-call':''}" onclick="setType(${leg.id},'call')">CALL</button>
           <button class="type-btn ${leg.type==='put'?'active-put':''}" onclick="setType(${leg.id},'put')">PUT</button>
           <button class="type-btn ${leg.type==='stock'?'active-stock':''}" onclick="setType(${leg.id},'stock')">STK</button>
@@ -344,13 +279,21 @@ function renderLegs() {
         </div>
       </td>
       <td>
-        <input class="cell-input" type="number" placeholder="${leg.type==='stock'?'entry price':'strike'}" value="${leg.strike||''}" oninput="setVal(${leg.id},'strike',this.value)" step="any"/>
+        <input class="cell-input" type="number" placeholder="${isStock?'entry price':'strike'}"
+          value="${leg.strike!==''?leg.strike:''}"
+          oninput="setVal(${leg.id},'strike',this.value)" step="any"/>
       </td>
       <td>
-        <input class="cell-input" type="number" placeholder="${leg.type==='stock'?'0':'premium'}" value="${leg.premium||''}" oninput="setVal(${leg.id},'premium',this.value)" step="any" ${leg.type==='stock'?'style="color:var(--muted2)"':''}/>
+        <input class="cell-input" type="number"
+          placeholder="${isStock?'0 (no premium)':'premium'}"
+          value="${leg.premium!==''?leg.premium:''}"
+          oninput="setVal(${leg.id},'premium',this.value)" step="any"
+          ${isStock?'style="color:var(--muted2)"':''}/>
       </td>
       <td>
-        <input class="cell-input" type="number" placeholder="1" value="${leg.qty||1}" oninput="setVal(${leg.id},'qty',this.value)" min="1" step="1" style="width:50px"/>
+        <input class="cell-input" type="number" placeholder="1"
+          value="${leg.qty!==''?leg.qty:1}"
+          oninput="setVal(${leg.id},'qty',this.value)" min="1" step="1" style="width:50px"/>
       </td>
       <td>
         <button class="del-btn" onclick="removeLeg(${leg.id})" title="Remove">×</button>
@@ -363,64 +306,152 @@ function renderLegs() {
 function addLeg(preset) {
   legCounter++;
   legs.push({
-    id: legCounter,
-    type: preset?.type || 'call',
-    dir: preset?.dir || 'long',
-    strike: preset?.strike || '',
+    id:      legCounter,
+    type:    preset?.type    || 'call',
+    dir:     preset?.dir     || 'long',
+    strike:  preset?.strike  ?? '',
     premium: preset?.premium ?? '',
-    qty: preset?.qty || 1,
+    qty:     preset?.qty     || 1,
   });
   renderLegs();
 }
 
-function removeLeg(id) {
-  legs = legs.filter(l => l.id !== id);
-  renderLegs();
-}
-
-function setType(id, type) {
-  const l = legs.find(l => l.id === id);
-  if (l) { l.type = type; renderLegs(); }
-}
-function setDir(id, dir) {
-  const l = legs.find(l => l.id === id);
-  if (l) { l.dir = dir; renderLegs(); }
-}
+function removeLeg(id) { legs = legs.filter(l => l.id !== id); renderLegs(); }
+function setType(id, type) { const l = legs.find(l=>l.id===id); if(l){l.type=type; renderLegs();} }
+function setDir(id, dir)   { const l = legs.find(l=>l.id===id); if(l){l.dir=dir;   renderLegs();} }
 function setVal(id, field, val) {
-  const l = legs.find(l => l.id === id);
-  if (l) l[field] = val === '' ? '' : parseFloat(val);
+  const l = legs.find(l=>l.id===id);
+  if(l) l[field] = val==='' ? '' : parseFloat(val);
 }
 
 function clearAll() {
-  legs = []; legCounter = 0;
-  renderLegs();
-  document.getElementById('results').style.display = 'none';
+  legs=[]; legCounter=0; renderLegs();
+  document.getElementById('results').style.display='none';
   document.getElementById('results').classList.remove('visible');
 }
 
 function loadPreset(name) {
-  legs = []; legCounter = 0;
+  legs=[]; legCounter=0;
   PRESETS[name].forEach(p => addLeg(p));
 }
 
-/* ── PAYOFF CALC ── */
+/* ══════════════════════════════════════════════════
+   PAYOFF ENGINE — FIXED
+   ══════════════════════════════════════════════════
+
+   SIGN CONVENTION (all per-share, before multiplying by qty):
+   ─────────────────────────────────────────────────
+   Long call:   max(0, S−K) − P        P = premium paid (positive number)
+   Short call: −max(0, S−K) + P        receive premium
+   Long put:    max(0, K−S) − P
+   Short put:  −max(0, K−S) + P
+   Long stock:  S − entryPrice         (premium field = entryPrice, or 0)
+   Short stock: entryPrice − S
+
+   Net premium = Σ (received − paid) across all option legs
+                 For stocks it is included directly in the P&L formula.
+
+   The function legPayoff(leg, S) returns the COMPLETE P&L for that leg
+   at stock price S, including the premium effect.  No separate
+   "net premium" adjustment is needed afterwards.
+   ══════════════════════════════════════════════════ */
+
 function legPayoff(leg, S) {
-  const dir = leg.dir === 'long' ? 1 : -1;
-  const q = leg.qty || 1;
-  const strike = parseFloat(leg.strike);
-  const premium = parseFloat(leg.premium) || 0;
+  const q  = Math.max(0, parseFloat(leg.qty) || 1);
+  const K  = parseFloat(leg.strike);
+  // If no premium entered, treat as 0 (free option — unusual but valid input)
+  const P  = parseFloat(leg.premium) || 0;
 
   if (leg.type === 'call') {
-    return dir * q * (Math.max(0, S - strike) - premium);
+    const intrinsic = Math.max(0, S - K);
+    return leg.dir === 'long'
+      ? q * (intrinsic - P)
+      : q * (P - intrinsic);
+
   } else if (leg.type === 'put') {
-    return dir * q * (Math.max(0, strike - S) - premium);
-  } else { // stock
-    return dir * q * (S - strike); // P&L relative to entry
+    const intrinsic = Math.max(0, K - S);
+    return leg.dir === 'long'
+      ? q * (intrinsic - P)
+      : q * (P - intrinsic);
+
+  } else {
+    // Stock: P field = entry price (cost basis); no separate option premium
+    const entryPrice = P;   // user enters entry price in "Premium / Cost" field
+    return leg.dir === 'long'
+      ? q * (S - entryPrice)
+      : q * (entryPrice - S);
   }
 }
 
 function totalPayoff(S) {
   return legs.reduce((sum, leg) => sum + legPayoff(leg, S), 0);
+}
+
+/* Net premium — purely informational display (positive = net credit received) */
+function calcNetPremium() {
+  return legs.reduce((sum, leg) => {
+    if (leg.type === 'stock') return sum; // stock has no separate option premium
+    const P = parseFloat(leg.premium) || 0;
+    const q = Math.max(0, parseFloat(leg.qty) || 1);
+    return sum + (leg.dir === 'short' ? 1 : -1) * P * q;
+  }, 0);
+}
+
+/* ─────────────────────────────────────────────────
+   SLOPE ANALYSIS for unbounded profit/loss detection
+   ─────────────────────────────────────────────────
+   "delta" here means ∂(totalPayoff)/∂S in each region.
+
+   Below the lowest strike:
+     calls contribute 0, puts contribute ±qty per unit move,
+     stocks contribute ±qty per unit move.
+
+   Above the highest strike:
+     calls contribute ±qty, puts contribute 0,
+     stocks contribute ±qty.
+
+   We evaluate at many sample points including all "kink" points
+   (strikes) plus well beyond them to catch the true extremes.
+   ───────────────────────────────────────────────── */
+
+function buildSamplePrices(lo, hi, steps) {
+  const pts = new Set();
+  const step = (hi - lo) / steps;
+  for (let i = 0; i <= steps; i++) pts.add(lo + i * step);
+  // Add every strike and ε around it for accurate kink capture
+  legs.forEach(leg => {
+    const K = parseFloat(leg.strike);
+    if (!isNaN(K)) {
+      pts.add(K - 0.0001);
+      pts.add(K);
+      pts.add(K + 0.0001);
+    }
+  });
+  return [...pts].filter(p => p >= 0).sort((a,b)=>a-b);
+}
+
+/* Slope of total payoff as S → +∞ (above all strikes) */
+function slopeAboveAll() {
+  return legs.reduce((s, leg) => {
+    const dir = leg.dir === 'long' ? 1 : -1;
+    const q   = Math.max(0, parseFloat(leg.qty) || 1);
+    if (leg.type === 'call')  return s + dir * q;  // call delta → 1 above strike
+    if (leg.type === 'stock') return s + dir * q;  // stock delta = 1 always
+    // put delta → 0 above strike
+    return s;
+  }, 0);
+}
+
+/* Slope of total payoff as S → 0+ (below all strikes) */
+function slopeBelowAll() {
+  return legs.reduce((s, leg) => {
+    const dir = leg.dir === 'long' ? 1 : -1;
+    const q   = Math.max(0, parseFloat(leg.qty) || 1);
+    if (leg.type === 'put')   return s - dir * q;  // put gains as S falls → slope is −dir
+    if (leg.type === 'stock') return s + dir * q;  // stock moves 1:1 with S
+    // call delta → 0 below strike
+    return s;
+  }, 0);
 }
 
 /* ── ANALYSIS ── */
@@ -433,101 +464,112 @@ function runAnalysis() {
     return;
   }
 
-  for (const leg of legs) {
+  for (const [i, leg] of legs.entries()) {
     const s = parseFloat(leg.strike);
     if (isNaN(s) || s <= 0) {
-      errEl.style.display = 'block';
-      errEl.textContent = `Error — leg ${legs.indexOf(leg)+1} has an invalid strike/price.`;
+      errEl.style.display='block';
+      errEl.textContent=`Error — leg ${i+1} has an invalid strike/price.`;
       return;
     }
     const qty = parseFloat(leg.qty);
     if (isNaN(qty) || qty <= 0) {
-      errEl.style.display = 'block';
-      errEl.textContent = `Error — leg ${legs.indexOf(leg)+1} has an invalid quantity.`;
+      errEl.style.display='block';
+      errEl.textContent=`Error — leg ${i+1} has an invalid quantity.`;
       return;
     }
   }
   errEl.style.display = 'none';
 
-  // Price range
+  /* ── Price range for chart ── */
   const strikes = legs.map(l => parseFloat(l.strike)).filter(s => !isNaN(s));
   const minS = Math.min(...strikes);
   const maxS = Math.max(...strikes);
-  const spread = maxS - minS || minS;
-  const lo = Math.max(0.01, minS - spread * 0.6);
-  const hi = maxS + spread * 0.6;
-  const steps = 400;
-  const step = (hi - lo) / steps;
+  const spread = maxS - minS || minS * 0.3;
+  const lo = Math.max(0.01, minS - spread * 0.7);
+  const hi = maxS + spread * 0.7;
 
-  const prices = [], pnls = [];
-  for (let i = 0; i <= steps; i++) {
-    const S = lo + i * step;
-    prices.push(parseFloat(S.toFixed(4)));
-    pnls.push(parseFloat(totalPayoff(S).toFixed(4)));
-  }
+  const prices = buildSamplePrices(lo, hi, 600);
+  const pnls   = prices.map(S => parseFloat(totalPayoff(S).toFixed(6)));
 
-  // Metrics
-  const netPremium = legs.reduce((sum, leg) => {
-    const p = parseFloat(leg.premium) || 0;
-    const q = parseFloat(leg.qty) || 1;
-    return sum + (leg.type !== 'stock' ? (leg.dir === 'long' ? -1 : 1) * p * q : 0);
-  }, 0);
+  /* ── Unbounded detection via slope analysis ── */
+  const upSlope   = slopeAboveAll();   // net delta above ALL strikes
+  const downSlope = slopeBelowAll();   // net delta of payoff as S→0+
+  //   upSlope > 0  → payoff rises without bound as S→∞   (unlimited profit)
+  //   upSlope < 0  → payoff falls without bound as S→∞   (unlimited loss)
+  //   downSlope < 0 → payoff falls as S→0 (unlimited loss if S can go to 0)
+  //   downSlope > 0 → payoff rises as S→0 (unlimited profit if S→0)
+  // For a *short stock* or *short put* we can have loss as S→0
+  // Note: S can only reach 0 (stock going bankrupt), so
+  //   unbounded loss downward means the minimum approaches −∞ as S→0+
 
-  // Breakevens (zero crossings)
+  const unboundedProfitUp   = upSlope   > 1e-9;
+  const unboundedLossUp     = upSlope   < -1e-9;
+  const unboundedProfitDown = downSlope > 1e-9;  // profit as price collapses
+  const unboundedLossDown   = downSlope < -1e-9;  // loss as price collapses
+
+  const isMaxProfitUnbounded = unboundedProfitUp || unboundedProfitDown;
+  const isMaxLossUnbounded   = unboundedLossUp   || unboundedLossDown;
+
+  /* ── True max / min from sampled range + extrapolation ── */
+  // Sample a wide range well beyond the chart window to catch extremes
+  const farLo = Math.max(0.01, minS * 0.01);  // 1% of lowest strike
+  const farHi = maxS * 4;                      // 4× highest strike
+  const extraPrices = buildSamplePrices(farLo, farHi, 2000);
+  const extraPnls   = extraPrices.map(S => totalPayoff(S));
+
+  const sampledMax = Math.max(...extraPnls);
+  const sampledMin = Math.min(...extraPnls);
+
+  const trueMax = isMaxProfitUnbounded ? Infinity  : sampledMax;
+  const trueMin = isMaxLossUnbounded   ? -Infinity : sampledMin;
+
+  /* ── Net premium (informational) ── */
+  const netPremium = calcNetPremium();
+
+  /* ── Breakevens (zero crossings) ── */
   const breakevens = [];
   for (let i = 0; i < pnls.length - 1; i++) {
-    if ((pnls[i] < 0 && pnls[i+1] >= 0) || (pnls[i] >= 0 && pnls[i+1] < 0)) {
-      const frac = -pnls[i] / (pnls[i+1] - pnls[i]);
-      breakevens.push(prices[i] + frac * (prices[i+1] - prices[i]));
+    const a = pnls[i], b = pnls[i+1];
+    if ((a < 0 && b >= 0) || (a >= 0 && b < 0)) {
+      const frac = -a / (b - a);
+      const be = prices[i] + frac * (prices[i+1] - prices[i]);
+      // Deduplicate (kink points can cause two adjacent crossings at same value)
+      if (breakevens.length === 0 || Math.abs(be - breakevens[breakevens.length-1]) > 0.01) {
+        breakevens.push(be);
+      }
     }
   }
 
-  // Analytically compute slope of total payoff as S→∞ and S→0+
-  // For a call: slope at S→∞ = dir*qty, slope at S→0 = 0
-  // For a put:  slope at S→∞ = 0,       slope at S→0 = -dir*qty (put gains as S falls)
-  // For stock:  slope at S→∞ = dir*qty,  slope at S→0 = dir*qty
-  function slopeAtInfinity() {
-    return legs.reduce((s, leg) => {
-      const dir = leg.dir === 'long' ? 1 : -1;
-      const q = parseFloat(leg.qty) || 1;
-      if (leg.type === 'call' || leg.type === 'stock') return s + dir * q;
-      return s; // puts have zero slope at infinity
-    }, 0);
-  }
-  function slopeAtZero() {
-    return legs.reduce((s, leg) => {
-      const dir = leg.dir === 'long' ? 1 : -1;
-      const q = parseFloat(leg.qty) || 1;
-      if (leg.type === 'put') return s - dir * q; // put payoff rises as S→0
-      if (leg.type === 'stock') return s + dir * q;
-      return s; // calls have zero slope at zero
-    }, 0);
-  }
-
-  const upSlope   = slopeAtInfinity();   // net delta above all strikes
-  const downSlope = slopeAtZero();        // net delta below all strikes
-
-  // Truly unbounded upside: slope > 0 as S→∞
-  // Truly unbounded downside: slope < 0 as S→0 (i.e. value keeps falling as price falls)
-  const isMaxUnbounded = upSlope > 0;
-  const isMinUnbounded = downSlope < 0;
-
-  // True max/min: from sampled range only when bounded
-  const trueMax = isMaxUnbounded ? Infinity  : Math.max(...pnls);
-  const trueMin = isMinUnbounded ? -Infinity : Math.min(...pnls);
-
-  // Update cards
+  /* ── Update metric cards ── */
   const npEl = document.getElementById('mNet');
   npEl.textContent = (netPremium >= 0 ? '+' : '') + netPremium.toFixed(2);
-  npEl.className = 'metric-value ' + (netPremium >= 0 ? 'mv-green' : 'mv-red');
+  npEl.className   = 'metric-value ' + (netPremium >= 0 ? 'mv-green' : 'mv-red');
 
-  document.getElementById('mMaxP').textContent = isMaxUnbounded ? '∞ (unlimited)' : (trueMax >= 0 ? '+' : '') + trueMax.toFixed(2);
-  document.getElementById('mMaxL').textContent = isMinUnbounded ? '−∞ (unlimited)' : trueMin.toFixed(2);
-  document.getElementById('mBE').textContent = breakevens.length
+  const mpEl = document.getElementById('mMaxP');
+  if (isMaxProfitUnbounded) {
+    mpEl.textContent = '∞ (unlimited)';
+    mpEl.className   = 'metric-value mv-green';
+  } else {
+    mpEl.textContent = (trueMax >= 0 ? '+' : '') + trueMax.toFixed(2);
+    mpEl.className   = 'metric-value ' + (trueMax >= 0 ? 'mv-green' : 'mv-red');
+  }
+
+  const mlEl = document.getElementById('mMaxL');
+  if (isMaxLossUnbounded) {
+    mlEl.textContent = '−∞ (unlimited)';
+    mlEl.className   = 'metric-value mv-red';
+  } else {
+    mlEl.textContent = trueMin.toFixed(2);
+    mlEl.className   = 'metric-value ' + (trueMin >= 0 ? 'mv-green' : 'mv-red');
+  }
+
+  const beEl = document.getElementById('mBE');
+  beEl.textContent = breakevens.length
     ? breakevens.map(b => b.toFixed(2)).join('\n')
     : 'none in range';
+  beEl.className = 'metric-value mv-neutral';
 
-  // Chart
+  /* ── Chart ── */
   if (chart) { chart.destroy(); chart = null; }
   chart = new Chart(document.getElementById('bfChart'), {
     type: 'line',
@@ -544,11 +586,11 @@ function runAnalysis() {
       }]
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
+      responsive: true, maintainAspectRatio: false,
+      interaction: {mode:'index', intersect:false},
+      plugins: {
+        legend: {display:false},
+        tooltip: {
           backgroundColor:'white',
           borderColor:'rgba(0,0,0,0.1)',
           borderWidth:1,
@@ -557,20 +599,20 @@ function runAnalysis() {
           titleFont:{family:'DM Mono',size:10},
           bodyFont:{family:'DM Mono',size:12},
           padding:10,
-          callbacks:{
+          callbacks: {
             title: ctx => 'Price: ' + parseFloat(ctx[0].label).toFixed(2),
             label: ctx => 'P&L:  ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw.toFixed(2)
           }
         }
       },
-      scales:{
-        x:{
+      scales: {
+        x: {
           type:'linear',
           ticks:{color:'#bbb',font:{family:'DM Mono',size:10},maxTicksLimit:9,callback:v=>v.toFixed(0)},
           grid:{color:'rgba(0,0,0,0.04)'},
           border:{color:'rgba(0,0,0,0.1)'}
         },
-        y:{
+        y: {
           ticks:{color:'#bbb',font:{family:'DM Mono',size:10},callback:v=>(v>=0?'+':'')+v.toFixed(1)},
           grid:{color:'rgba(0,0,0,0.04)'},
           border:{color:'rgba(0,0,0,0.1)'}
@@ -579,30 +621,41 @@ function runAnalysis() {
     }
   });
 
-  // Legs summary
+  /* ── Legs summary ── */
   const ls = document.getElementById('legsSummary');
   ls.innerHTML = legs.map((leg, i) => {
     const typeBadge = `<span class="leg-badge badge-${leg.type}">${leg.type.toUpperCase()}</span>`;
     const dirBadge  = `<span class="leg-badge badge-${leg.dir}">${leg.dir.toUpperCase()}</span>`;
     const qty = leg.qty || 1;
     const strike = parseFloat(leg.strike).toFixed(2);
-    const premium = leg.type !== 'stock' ? ` · premium ${parseFloat(leg.premium||0).toFixed(2)}` : '';
+    const premLabel = leg.type === 'stock' ? 'entry' : 'premium';
+    const premVal   = parseFloat(leg.premium||0).toFixed(2);
+    const premPart  = leg.type !== 'stock' || parseFloat(leg.premium||0) !== 0
+      ? ` · ${premLabel} ${premVal}` : '';
     return `<div class="leg-summary-row">
       <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);min-width:16px">${i+1}</span>
       ${typeBadge} ${dirBadge}
       <span style="color:var(--text)">×${qty}</span>
-      <span style="color:var(--muted)">strike ${strike}${premium}</span>
+      <span style="color:var(--muted)">strike ${strike}${premPart}</span>
     </div>`;
   }).join('');
 
-  // Detail
+  /* ── Detail ── */
   const dw = document.getElementById('detailWrap');
+  const maxPStr = isMaxProfitUnbounded ? '∞ (unlimited upside)'
+    : (trueMax >= 0 ? '+' : '') + trueMax.toFixed(2);
+  const maxLStr = isMaxLossUnbounded ? '−∞ (unlimited downside)'
+    : trueMin.toFixed(2);
+
   const rows = [
-    ['Strategy legs', legs.length + ' leg' + (legs.length!==1?'s':''),'dv'],
-    ['Net premium', (netPremium>=0?'+':'')+netPremium.toFixed(2), netPremium>=0?'dv-g':'dv-r'],
-    ['Max profit', isMaxUnbounded ? '∞ (unlimited upside)' : (trueMax>=0?'+':'')+trueMax.toFixed(2), 'dv-g'],
-    ['Max loss', isMinUnbounded ? '−∞ (unlimited downside)' : trueMin.toFixed(2), 'dv-r'],
-    ...breakevens.map((b,i) => [`Breakeven ${breakevens.length>1?i+1:''}`.trim(), b.toFixed(2), 'dv']),
+    ['Strategy legs', legs.length + ' leg' + (legs.length!==1?'s':''), 'dv'],
+    ['Net option premium', (netPremium>=0?'+':'')+netPremium.toFixed(2), netPremium>=0?'dv-g':'dv-r'],
+    ['Max profit', maxPStr, 'dv-g'],
+    ['Max loss',   maxLStr, 'dv-r'],
+    ...breakevens.map((b,i) => [
+      `Breakeven${breakevens.length>1?' '+(i+1):''}`,
+      b.toFixed(2), 'dv'
+    ]),
     ['Price range shown', lo.toFixed(2) + ' — ' + hi.toFixed(2), 'dv'],
   ];
   dw.innerHTML = rows.map(([k,v,cls]) => `
@@ -611,7 +664,7 @@ function runAnalysis() {
       <span class="${cls}" style="font-family:var(--mono);font-size:0.78rem">${v}</span>
     </div>`).join('');
 
-  // Show
+  /* ── Show results ── */
   const res = document.getElementById('results');
   res.classList.remove('visible');
   void res.offsetWidth;
@@ -620,10 +673,8 @@ function runAnalysis() {
   setTimeout(() => res.scrollIntoView({behavior:'smooth',block:'start'}), 50);
 }
 
-// Enter key
 document.addEventListener('keydown', e => { if (e.key === 'Enter') runAnalysis(); });
 
-// Init with butterfly
 loadPreset('butterfly');
 </script>
 </body>
