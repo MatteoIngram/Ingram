@@ -166,6 +166,692 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
 <body>
 
 <nav>
+  <a class="nav-back" href="index.html">Matteo Ingarm</a>
+  <span class="nav-title">Market Simulator</span>
+  <span class="nav-year" id="navYear">2026</span>
+</nav>
+
+<main>
+  <header class="page-header">
+    <div class="page-tag">Finance · Trading Simulation</div>
+    <h1>Market Simulator</h1>
+    <div class="page-sub">Starting price $100.00 — the price drifts on its own, and a headline breaks every 20 seconds. Buy, sell, or hold.</div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup">
+    <div class="field">
+      <label>Your name (optional)</label>
+      <input type="text" id="playerName" placeholder="e.g. Jordan"/>
+    </div>
+    <div class="field">
+      <label>Session length</label>
+      <select id="roundCount">
+        <option value="10">10 rounds (~3.3 min)</option>
+        <option value="15" selected>15 rounds (~5 min)</option>
+        <option value="20">20 rounds (~6.7 min)</option>
+        <option value="30">30 rounds (~10 min)</option>
+        <option value="0">Unlimited</option>
+      </select>
+      <div class="field-hint">A new headline breaks every 20 seconds; the price keeps drifting in between.</div>
+    </div>
+    <div class="field">
+      <label>Starting capital</label>
+      <select id="startCapital">
+        <option value="1000">$1,000</option>
+        <option value="10000" selected>$10,000</option>
+        <option value="100000">$100,000</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="startGame()">Start simulation →</button>
+  </section>
+
+  <!-- GAME -->
+  <section id="game">
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-label">Price</div><div class="metric-value mv-neutral" id="mPrice">$100.00</div></div>
+      <div class="metric"><div class="metric-label">Cash</div><div class="metric-value mv-neutral" id="mCash">—</div></div>
+      <div class="metric"><div class="metric-label">Shares</div><div class="metric-value mv-neutral" id="mShares">0</div></div>
+      <div class="metric"><div class="metric-label">Portfolio</div><div class="metric-value mv-neutral" id="mPortfolio">—</div></div>
+      <div class="metric"><div class="metric-label">P&L</div><div class="metric-value mv-neutral" id="mPnl">—</div></div>
+    </div>
+
+    <div class="timer-wrap">
+      <span class="timer-label" id="roundLabel">ROUND 1 / 15</span>
+      <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+      <span class="round-label" id="timerSeconds">20s</span>
+      <button class="btn btn-ghost" id="pauseBtn" onclick="togglePause()" style="padding:0.35rem 0.7rem">Pause</button>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <span class="chart-title">Price history</span>
+        <span class="chart-title" id="avgCostLabel"></span>
+      </div>
+      <div id="chartContainer">
+        <canvas id="priceChart" role="img" aria-label="Stock price over time"></canvas>
+      </div>
+    </div>
+
+    <div class="trade-panel">
+      <span class="qty-label">Qty</span>
+      <input class="qty-input" type="number" id="qtyInput" value="10" min="1" step="1"/>
+      <span class="qty-label" id="qtyCostLabel"></span>
+      <div class="trade-actions">
+        <button class="btn btn-buy" onclick="doTrade('buy')">Buy</button>
+        <button class="btn btn-sell" onclick="doTrade('sell')">Sell</button>
+        <button class="btn btn-hold" onclick="doTrade('hold')">Hold</button>
+      </div>
+      <div class="trade-msg" id="tradeMsg"></div>
+    </div>
+
+    <div class="sec-label">Activity log</div>
+    <div class="log-wrap" id="logWrap"></div>
+
+    <div class="controls-row">
+      <button class="btn btn-ghost" onclick="endGame(true)">End session now</button>
+      <button class="btn btn-ghost" onclick="resetGame()">Restart</button>
+    </div>
+  </section>
+
+  <!-- END SCREEN -->
+  <section id="end">
+    <div class="end-title" id="endTitle">Session complete</div>
+    <div class="detail-wrap" id="endDetail"></div>
+    <button class="btn btn-primary" onclick="resetGame()">Play again →</button>
+  </section>
+</main>
+
+<footer>
+  <span>Market Simulator</span>
+  <span id="footYear">2026</span>
+</footer>
+
+<!-- EVENT POPUP -->
+<div id="eventOverlay">
+  <div class="event-card">
+    <div class="event-tag" id="evTag">Breaking News</div>
+    <div class="event-headline" id="evHeadline"></div>
+    <div class="event-body" id="evBody"></div>
+    <div class="event-close" onclick="dismissEvent()">dismiss ×</div>
+  </div>
+</div>
+
+<script>
+document.getElementById('navYear').textContent = new Date().getFullYear();
+document.getElementById('footYear').textContent = new Date().getFullYear();
+
+/* ══════════════════ EVENT POOL ══════════════════ */
+const EVENTS = [
+  {tag:'Geopolitics', headline:'Strait of Hormuz closed to tanker traffic', body:'Naval tensions disrupt one of the world’s busiest oil shipping routes.', sentiment:-1, min:4, max:11},
+  {tag:'Geopolitics', headline:'Ceasefire agreement reached in key trade region', body:'De-escalation eases fears of a prolonged supply disruption.', sentiment:1, min:3, max:8},
+  {tag:'Monetary Policy', headline:'Central bank raises interest rates by 50bps', body:'Higher borrowing costs weigh on equity valuations.', sentiment:-1, min:2, max:6},
+  {tag:'Monetary Policy', headline:'Central bank cuts interest rates unexpectedly', body:'Cheaper credit boosts risk appetite across markets.', sentiment:1, min:2, max:6},
+  {tag:'Monetary Policy', headline:'Central bank holds rates steady, as expected', body:'Policy stays unchanged; markets shrug it off.', sentiment:0, min:0, max:2},
+  {tag:'Earnings', headline:'Company beats quarterly earnings expectations', body:'Revenue and EPS both surpass analyst forecasts.', sentiment:1, min:3, max:9},
+  {tag:'Earnings', headline:'Company misses quarterly earnings, cuts guidance', body:'Weak demand forces a downward revision to the full-year outlook.', sentiment:-1, min:3, max:9},
+  {tag:'Earnings', headline:'Company reports earnings in line with estimates', body:'No surprises in the latest quarterly filing.', sentiment:0, min:0, max:2},
+  {tag:'Policy', headline:'Government announces new subsidies for the sector', body:'Tax credits and grants aim to spur investment.', sentiment:1, min:2, max:7},
+  {tag:'Policy', headline:'New tariffs announced on key imports', body:'Higher input costs threaten margins across the industry.', sentiment:-1, min:2, max:7},
+  {tag:'Regulation', headline:'Regulators open antitrust investigation', body:'Scrutiny raises uncertainty about future operations.', sentiment:-1, min:2, max:6},
+  {tag:'Regulation', headline:'Regulator approves long-awaited merger', body:'Deal clears its final hurdle, removing an overhang on the stock.', sentiment:1, min:2, max:6},
+  {tag:'Macro', headline:'Inflation data comes in hotter than expected', body:'Rising prices renew fears of tighter monetary policy.', sentiment:-1, min:2, max:5},
+  {tag:'Macro', headline:'Inflation cools more than forecast', body:'Markets rally on hopes of an easier policy path ahead.', sentiment:1, min:2, max:5},
+  {tag:'Macro', headline:'Unemployment claims rise sharply', body:'Weaker labor market data stokes recession worries.', sentiment:-1, min:2, max:6},
+  {tag:'Macro', headline:'Jobs report beats expectations', body:'Strong hiring numbers support consumer spending outlook.', sentiment:1, min:2, max:5},
+  {tag:'Supply Chain', headline:'Key supplier announces factory shutdown', body:'Production delays threaten near-term output.', sentiment:-1, min:3, max:8},
+  {tag:'Supply Chain', headline:'Shipping costs fall as congestion clears', body:'Logistics bottlenecks ease, improving margins.', sentiment:1, min:2, max:5},
+  {tag:'Innovation', headline:'Company unveils breakthrough new product', body:'Analysts raise price targets on strong early demand signals.', sentiment:1, min:3, max:9},
+  {tag:'Innovation', headline:'Product recall issued over safety concerns', body:'Reputational damage and recall costs pressure the outlook.', sentiment:-1, min:3, max:9},
+  {tag:'Market Sentiment', headline:'Major index rebalances, stock added to benchmark', body:'Passive fund inflows expected as trackers adjust holdings.', sentiment:1, min:1, max:4},
+  {tag:'Market Sentiment', headline:'Influential analyst issues a downgrade', body:'Price target cut citing valuation concerns.', sentiment:-1, min:1, max:4},
+  {tag:'Market Sentiment', headline:'Viral social media post questions company practices', body:'Sentiment turns negative online, though facts remain unverified.', sentiment:-1, min:1, max:5},
+  {tag:'Leadership', headline:'CEO announces surprise resignation', body:'Leadership uncertainty unsettles investors.', sentiment:-1, min:2, max:6},
+  {tag:'Leadership', headline:'Respected industry veteran named new CEO', body:'Markets welcome the experienced leadership hire.', sentiment:1, min:1, max:4},
+  {tag:'Natural Events', headline:'Severe weather disrupts regional operations', body:'Temporary shutdowns weigh on near-term output.', sentiment:-1, min:2, max:6},
+  {tag:'Corporate Action', headline:'Company announces share buyback program', body:'Reduced share count seen as a signal of management confidence.', sentiment:1, min:2, max:5},
+  {tag:'Corporate Action', headline:'Company issues new shares to raise capital', body:'Dilution concerns weigh on existing shareholders.', sentiment:-1, min:2, max:5},
+  {tag:'Neutral', headline:'Company holds annual shareholder meeting', body:'No major announcements; business proceeds as usual.', sentiment:0, min:0, max:2},
+  {tag:'Neutral', headline:'Trading volume stays quiet ahead of holiday', body:'Light activity leaves the stock largely directionless.', sentiment:0, min:0, max:2},
+];
+
+/* ══════════════════ STATE ══════════════════ */
+let state = null;
+let priceChart = null;
+let timerUiInterval = null;   // 100ms countdown-bar updater
+let priceInterval = null;     // price random-walk / impact-easing updater
+let roundTimeout = null;
+let timerStart = 0;
+let timerRemaining = 20000;
+let paused = false;
+let pauseStart = 0;
+let lastEventCard = null;
+
+const ROUND_MS = 20000;   // time between headlines
+const TICK_MS = 500;      // price update resolution (2x/sec)
+const IMPACT_MS = 3000;   // time for price to ease toward the news-driven target
+const IDLE_VOL = 0.15;    // max % random-walk step per tick when no news is resolving
+const MAX_HISTORY = 2400; // ~20 min of ticks kept on the chart
+
+function fmtMoney(v){
+  const s = v<0 ? '-' : '';
+  return s + '$' + Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function newState(name, rounds, capital){
+  return {
+    name: name || 'Trader',
+    totalRounds: rounds,
+    round: 0,
+    cash: capital,
+    startCash: capital,
+    shares: 0,
+    avgCost: 0,
+    price: 100,
+    tickCount: 0,
+    history: [{t:0, price:100}],
+    impact: null, // {fromPrice, toPrice, startTime, duration} while a headline is resolving
+    eventDeck: shuffledDeck(),
+    log: [],
+    ended: false,
+  };
+}
+
+/* ══════════════════ SETUP / START ══════════════════ */
+function startGame(){
+  const name = document.getElementById('playerName').value.trim();
+  const rounds = parseInt(document.getElementById('roundCount').value, 10);
+  const capital = parseFloat(document.getElementById('startCapital').value);
+
+  state = newState(name, rounds, capital);
+  paused = false;
+  document.getElementById('pauseBtn').textContent = 'Pause';
+
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('end').classList.remove('visible');
+  document.getElementById('game').classList.add('visible');
+
+  renderAll();
+  buildChart();
+  startRoundTimer();
+  priceInterval = setInterval(tick, TICK_MS);
+}
+
+function resetGame(){
+  if(timerUiInterval) clearInterval(timerUiInterval);
+  if(roundTimeout) clearTimeout(roundTimeout);
+  if(priceInterval) clearInterval(priceInterval);
+  document.getElementById('game').classList.remove('visible');
+  document.getElementById('end').classList.remove('visible');
+  document.getElementById('setup').style.display = 'block';
+  document.getElementById('logWrap').innerHTML = '';
+}
+
+/* ══════════════════ ROUND TIMER (headline cadence) ══════════════════ */
+function startRoundTimer(){
+  timerRemaining = ROUND_MS;
+  timerStart = Date.now();
+  if(timerUiInterval) clearInterval(timerUiInterval);
+  timerUiInterval = setInterval(updateTimerUI, 100);
+  if(roundTimeout) clearTimeout(roundTimeout);
+  roundTimeout = setTimeout(runRound, ROUND_MS);
+}
+
+function updateTimerUI(){
+  if(paused) return;
+  const elapsed = Date.now() - timerStart;
+  const remaining = Math.max(0, ROUND_MS - elapsed);
+  const pct = (remaining / ROUND_MS) * 100;
+  document.getElementById('timerFill').style.width = pct + '%';
+  document.getElementById('timerSeconds').textContent = Math.ceil(remaining/1000) + 's';
+}
+
+function togglePause(){
+  if(!state || state.ended) return;
+  paused = !paused;
+  const btn = document.getElementById('pauseBtn');
+  if(paused){
+    clearInterval(timerUiInterval);
+    clearTimeout(roundTimeout);
+    clearInterval(priceInterval);
+    timerRemaining = Math.max(0, ROUND_MS - (Date.now() - timerStart));
+    pauseStart = Date.now();
+    btn.textContent = 'Resume';
+  } else {
+    const pausedFor = Date.now() - pauseStart;
+    timerStart = Date.now() - (ROUND_MS - timerRemaining);
+    if(state.impact) state.impact.startTime += pausedFor; // don't let paused time count as animation progress
+    timerUiInterval = setInterval(updateTimerUI, 100);
+    roundTimeout = setTimeout(runRound, timerRemaining);
+    priceInterval = setInterval(tick, TICK_MS);
+    btn.textContent = 'Pause';
+  }
+}
+
+/* ══════════════════ PRICE MOTION ══════════════════
+   Every TICK_MS, the price either:
+   - drifts in a small random walk (idle, no news resolving), or
+   - eases toward the target set by the latest headline over IMPACT_MS,
+     so students watch it move and can trade mid-move.
+   ══════════════════════════════════════════════════ */
+function tick(){
+  if(!state || state.ended || paused) return;
+  const now = Date.now();
+
+  if(state.impact){
+    const elapsed = now - state.impact.startTime;
+    const t = Math.min(1, elapsed / state.impact.duration);
+    const eased = 1 - Math.pow(1-t, 2); // ease-out
+    let p = state.impact.fromPrice + (state.impact.toPrice - state.impact.fromPrice) * eased;
+    p *= 1 + (Math.random()-0.5) * 0.001; // tiny texture so it doesn't look robotic
+    state.price = Math.max(1, Math.round(p*100)/100);
+    if(t >= 1){
+      state.price = Math.max(1, state.impact.toPrice);
+      state.impact = null;
+    }
+  } else {
+    const step = (Math.random()-0.5) * 2 * IDLE_VOL;
+    const p = state.price * (1 + step/100);
+    state.price = Math.max(1, Math.round(p*100)/100);
+  }
+
+  state.tickCount++;
+  const sec = Math.round(state.tickCount * (TICK_MS/1000) * 10) / 10;
+  state.history.push({t: sec, price: state.price});
+  if(state.history.length > MAX_HISTORY) state.history.shift();
+
+  renderMetrics();
+  updateChart();
+}
+
+/* ══════════════════ HEADLINE / ROUND LOGIC ══════════════════
+   Events are dealt from a shuffled deck (not pure independent
+   random draws) so a session can't streak into all-positive or
+   all-negative news by chance — every event in the pool gets
+   played once before any repeats.
+   ══════════════════════════════════════════════════ */
+function shuffledDeck(){
+  const arr = [...EVENTS];
+  for(let i = arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function pickEvent(){
+  if(!state.eventDeck || state.eventDeck.length === 0){
+    state.eventDeck = shuffledDeck();
+    if(state.eventDeck[0] === lastEventCard && state.eventDeck.length > 1){
+      [state.eventDeck[0], state.eventDeck[1]] = [state.eventDeck[1], state.eventDeck[0]];
+    }
+  }
+  const ev = state.eventDeck.shift();
+  lastEventCard = ev;
+  return ev;
+}
+
+function runRound(){
+  if(!state || state.ended) return;
+  state.round++;
+
+  const ev = pickEvent();
+  const magnitude = ev.min + Math.random()*(ev.max - ev.min);
+  const noise = (Math.random()-0.5)*2; // +/-1% jitter regardless of sentiment
+  const pct = ev.sentiment * magnitude + noise;
+
+  const fromPrice = state.price;
+  let toPrice = fromPrice * (1 + pct/100);
+  toPrice = Math.max(1, Math.round(toPrice*100)/100);
+
+  const impact = toPrice - fromPrice;
+  const impactPct = (impact/fromPrice)*100;
+  state.log.unshift({
+    round: state.round, type:'news', tag: ev.tag,
+    text: ev.headline, impact, impactPct
+  });
+
+  // Don't snap the price — hand it to the ticker to ease toward the target
+  // over IMPACT_MS so students see it move before it settles.
+  state.impact = { fromPrice, toPrice, startTime: Date.now(), duration: IMPACT_MS };
+
+  showEventPopup(ev, impact, impactPct);
+  renderAll();
+
+  if(state.totalRounds > 0 && state.round >= state.totalRounds){
+    setTimeout(() => endGame(false), IMPACT_MS + 200); // let the move finish playing out first
+    return;
+  }
+  startRoundTimer();
+}
+
+function showEventPopup(ev, impact, impactPct){
+  document.getElementById('evTag').textContent = ev.tag + ' · Breaking News';
+  document.getElementById('evHeadline').textContent = ev.headline;
+  document.getElementById('evBody').textContent = ev.body;
+  const overlay = document.getElementById('eventOverlay');
+  overlay.classList.add('active');
+  clearTimeout(showEventPopup._t);
+  showEventPopup._t = setTimeout(dismissEvent, 15000);
+}
+function dismissEvent(){
+  document.getElementById('eventOverlay').classList.remove('active');
+}
+
+/* ══════════════════ TRADING ══════════════════ */
+function doTrade(action){
+  const msgEl = document.getElementById('tradeMsg');
+  msgEl.textContent = '';
+  const qty = Math.max(0, Math.floor(parseFloat(document.getElementById('qtyInput').value) || 0));
+
+  if(action === 'hold'){
+    state.log.unshift({round: state.round, type:'hold', text:'Held position', qty:0});
+    renderAll();
+    return;
+  }
+  if(qty <= 0){
+    msgEl.textContent = 'Enter a quantity greater than zero.';
+    return;
+  }
+  const cost = qty * state.price;
+
+  if(action === 'buy'){
+    if(cost > state.cash + 1e-9){
+      msgEl.textContent = 'Not enough cash for that trade.';
+      return;
+    }
+    state.avgCost = state.shares > 0
+      ? (state.avgCost*state.shares + cost) / (state.shares + qty)
+      : state.price;
+    state.cash -= cost;
+    state.shares += qty;
+    state.log.unshift({round: state.round, type:'buy', text:`Bought ${qty} @ ${fmtMoney(state.price)}`, qty});
+  } else if(action === 'sell'){
+    if(qty > state.shares){
+      msgEl.textContent = 'You don’t own that many shares.';
+      return;
+    }
+    state.cash += cost;
+    state.shares -= qty;
+    if(state.shares === 0) state.avgCost = 0;
+    state.log.unshift({round: state.round, type:'sell', text:`Sold ${qty} @ ${fmtMoney(state.price)}`, qty});
+  }
+  renderAll();
+}
+
+/* ══════════════════ RENDER ══════════════════ */
+function renderAll(){
+  renderMetrics();
+  renderLog();
+}
+
+function renderMetrics(){
+  document.getElementById('mPrice').textContent = fmtMoney(state.price);
+  document.getElementById('mCash').textContent = fmtMoney(state.cash);
+  document.getElementById('mShares').textContent = state.shares.toLocaleString();
+
+  const portfolioValue = state.cash + state.shares*state.price;
+  document.getElementById('mPortfolio').textContent = fmtMoney(portfolioValue);
+
+  const pnl = portfolioValue - state.startCash;
+  const pnlPct = (pnl/state.startCash)*100;
+  const pnlEl = document.getElementById('mPnl');
+  pnlEl.textContent = (pnl>=0?'+':'') + fmtMoney(pnl) + ' (' + (pnlPct>=0?'+':'') + pnlPct.toFixed(1) + '%)';
+  pnlEl.className = 'metric-value ' + (pnl > 0 ? 'mv-green' : pnl < 0 ? 'mv-red' : 'mv-neutral');
+
+  document.getElementById('avgCostLabel').textContent = state.shares > 0
+    ? 'avg cost ' + fmtMoney(state.avgCost) : '';
+
+  const roundLabel = document.getElementById('roundLabel');
+  roundLabel.textContent = state.totalRounds > 0
+    ? `ROUND ${state.round} / ${state.totalRounds}`
+    : `ROUND ${state.round}`;
+
+  document.getElementById('qtyCostLabel').textContent =
+    '≈ ' + fmtMoney((parseFloat(document.getElementById('qtyInput').value)||0) * state.price) + ' notional';
+}
+
+function renderLog(){
+  const wrap = document.getElementById('logWrap');
+  if(state.log.length === 0){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = state.log.map(entry => {
+    let tagClass, tagText, extra = '';
+    if(entry.type === 'news'){
+      tagClass = 'tag-news'; tagText = 'NEWS';
+      const sign = entry.impact >= 0 ? '+' : '';
+      const cls = entry.impact > 0 ? 'dv-g' : entry.impact < 0 ? 'dv-r' : '';
+      extra = `<span class="log-impact ${cls}">${sign}${entry.impact.toFixed(2)} (${sign}${entry.impactPct.toFixed(1)}%)</span>`;
+    } else if(entry.type === 'buy'){ tagClass='tag-buy'; tagText='BUY'; }
+    else if(entry.type === 'sell'){ tagClass='tag-sell'; tagText='SELL'; }
+    else { tagClass='tag-hold'; tagText='HOLD'; }
+
+    return `<div class="log-row">
+      <span class="log-round">#${entry.round}</span>
+      <span class="log-tag ${tagClass}">${tagText}</span>
+      <span class="log-text">${entry.text}${entry.tag ? ` <span class="log-sub">— ${entry.tag}</span>` : ''}</span>
+      ${extra}
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════ CHART ══════════════════ */
+function buildChart(){
+  if(priceChart){ priceChart.destroy(); priceChart = null; }
+  priceChart = new Chart(document.getElementById('priceChart'), {
+    type:'line',
+    data:{
+      labels: state.history.map(h=>h.t),
+      datasets:[{
+        label:'Price',
+        data: state.history.map(h=>h.price),
+        borderColor:'#555',
+        borderWidth:1.5,
+        pointRadius:0,
+        tension:0.15,
+        fill:{target:{value:100}, above:'rgba(22,163,74,0.06)', below:'rgba(220,38,38,0.06)'}
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      animation:false,
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'white', borderColor:'rgba(0,0,0,0.1)', borderWidth:1,
+          titleColor:'#999', bodyColor:'#111',
+          titleFont:{family:'DM Mono',size:10}, bodyFont:{family:'DM Mono',size:12},
+          padding:10,
+          callbacks:{
+            title: ctx => 'T+' + ctx[0].label + 's',
+            label: ctx => 'Price: $' + ctx.raw.toFixed(2)
+          }
+        }
+      },
+      scales:{
+        x:{ ticks:{color:'#bbb', font:{family:'DM Mono', size:10}, callback:v=>v+'s'}, grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'rgba(0,0,0,0.1)'} },
+        y:{ ticks:{color:'#bbb', font:{family:'DM Mono', size:10}, callback:v=>'$'+v.toFixed(0)}, grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'rgba(0,0,0,0.1)'} }
+      }
+    }
+  });
+}
+function updateChart(){
+  if(!priceChart) return;
+  priceChart.data.labels = state.history.map(h=>h.t);
+  priceChart.data.datasets[0].data = state.history.map(h=>h.price);
+  priceChart.update('none');
+}
+
+/* ══════════════════ END GAME ══════════════════ */
+function endGame(manual){
+  if(!state || state.ended) return;
+  state.ended = true;
+  clearInterval(timerUiInterval);
+  clearTimeout(roundTimeout);
+  clearInterval(priceInterval);
+  dismissEvent();
+
+  const portfolioValue = state.cash + state.shares*state.price;
+  const pnl = portfolioValue - state.startCash;
+  const pnlPct = (pnl/state.startCash)*100;
+  const trades = state.log.filter(e=>e.type==='buy'||e.type==='sell').length;
+
+  document.getElementById('game').classList.remove('visible');
+  document.getElementById('end').classList.add('visible');
+  document.getElementById('endTitle').textContent =
+    `${state.name}'s session complete${manual ? ' (ended early)' : ''}`;
+
+  const rows = [
+    ['Starting capital', fmtMoney(state.startCash), 'dv'],
+    ['Final portfolio value', fmtMoney(portfolioValue), 'dv'],
+    ['Total P&L', (pnl>=0?'+':'')+fmtMoney(pnl)+' ('+(pnlPct>=0?'+':'')+pnlPct.toFixed(1)+'%)', pnl>=0?'dv-g':'dv-r'],
+    ['Final price', fmtMoney(state.price), 'dv'],
+    ['Shares held at close', state.shares.toString(), 'dv'],
+    ['Cash at close', fmtMoney(state.cash), 'dv'],
+    ['Rounds played', state.round.toString(), 'dv'],
+    ['Trades executed', trades.toString(), 'dv'],
+  ];
+  document.getElementById('endDetail').innerHTML = rows.map(([k,v,cls])=>`
+    <div class="detail-row">
+      <span class="dk">${k}</span>
+      <span class="${cls}" style="font-family:var(--mono);font-size:0.78rem">${v}</span>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
+  background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);
+}
+.nav-back{font-family:var(--mono);font-size:0.625rem;font-weight:300;letter-spacing:0.1em;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.nav-back:hover{color:var(--text)}
+.nav-title{font-family:'EB Garamond',Georgia,serif;font-size:0.94rem;font-weight:400;letter-spacing:0.04em;color:var(--muted);}
+.nav-year{font-family:var(--mono);font-size:0.625rem;font-weight:300;color:var(--muted2);letter-spacing:0.08em;}
+
+main{max-width:960px;margin:0 auto;padding:5.5rem 2rem 6rem}
+
+.page-header{margin-bottom:2.5rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border)}
+.page-tag{font-family:var(--mono);font-size:0.66rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.6rem}
+h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
+.page-sub{font-size:0.82rem;color:var(--muted);font-family:var(--mono)}
+
+.sec-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+
+/* ── setup card ── */
+#setup{border:1px solid var(--border);padding:2rem;max-width:520px}
+.field{margin-bottom:1.25rem}
+.field label{display:block;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem}
+.field input[type="text"],.field select{
+  width:100%;border:1px solid var(--border-md);background:transparent;
+  padding:0.65rem 0.8rem;font-family:var(--mono);font-size:0.85rem;color:var(--text);
+  outline:none;
+}
+.field select{cursor:pointer}
+.field-hint{font-family:var(--mono);font-size:0.68rem;color:var(--muted2);margin-top:0.4rem}
+
+.btn{display:inline-flex;align-items:center;gap:0.4rem;background:transparent;border:1px solid var(--border-md);color:var(--text);font-family:var(--mono);font-size:0.74rem;letter-spacing:0.06em;padding:0.6rem 1.25rem;cursor:pointer;transition:background 0.15s,border-color 0.15s;}
+.btn:hover{background:var(--surface);border-color:rgba(0,0,0,0.25)}
+.btn:active{transform:scale(0.98)}
+.btn:disabled{opacity:0.35;cursor:not-allowed}
+.btn-primary{background:var(--text);color:white;border-color:var(--text)}
+.btn-primary:hover{background:#333;border-color:#333}
+.btn-ghost{color:var(--muted);border-color:var(--border)}
+.btn-ghost:hover{color:var(--text);background:var(--surface)}
+.btn-buy{border-color:#86efac;color:#15803d}
+.btn-buy:hover{background:#f0fdf4}
+.btn-sell{border-color:#fda4af;color:#be123c}
+.btn-sell:hover{background:#fff1f2}
+.btn-hold{border-color:var(--border-md);color:var(--muted)}
+.btn-hold:hover{background:var(--surface)}
+
+/* ── game layout ── */
+#game{display:none}
+#game.visible{display:block}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);margin-bottom:1.5rem}
+.metric{padding:1rem 1.1rem;border-right:1px solid var(--border)}
+.metric:last-child{border-right:none}
+.metric-label{font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem}
+.metric-value{font-family:var(--mono);font-size:1.2rem;font-weight:400;letter-spacing:-0.02em}
+.mv-green{color:var(--green)}.mv-red{color:var(--red)}.mv-neutral{color:var(--text)}
+
+.timer-wrap{border:1px solid var(--border);padding:0.9rem 1.1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.timer-label{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;white-space:nowrap}
+.timer-track{flex:1;height:4px;background:var(--surface2);position:relative;overflow:hidden}
+.timer-fill{position:absolute;left:0;top:0;bottom:0;background:var(--text);width:100%;transition:width 0.1s linear}
+.round-label{font-family:var(--mono);font-size:0.65rem;color:var(--muted2);white-space:nowrap}
+
+.chart-wrap{border:1px solid var(--border);background:white;padding:1.25rem 1.25rem 1rem;margin-bottom:1.5rem}
+.chart-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem}
+.chart-title{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+#chartContainer{position:relative;height:260px}
+
+.trade-panel{border:1px solid var(--border);padding:1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.qty-input{width:70px;border:1px solid var(--border-md);background:transparent;padding:0.55rem 0.6rem;font-family:var(--mono);font-size:0.85rem;color:var(--text);outline:none;text-align:center}
+.qty-label{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+.trade-actions{display:flex;gap:0.6rem;margin-left:auto;flex-wrap:wrap}
+.trade-msg{font-family:var(--mono);font-size:0.7rem;color:var(--red);width:100%}
+
+.log-wrap{border:1px solid var(--border);margin-bottom:1.5rem;max-height:320px;overflow-y:auto}
+.log-row{display:flex;gap:0.75rem;align-items:baseline;padding:0.6rem 1rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:0.73rem}
+.log-row:last-child{border-bottom:none}
+.log-round{color:var(--muted2);min-width:34px}
+.log-tag{padding:0.1rem 0.4rem;border-radius:2px;font-size:0.6rem;letter-spacing:0.05em;white-space:nowrap}
+.tag-news{background:var(--surface2);color:var(--muted)}
+.tag-buy{background:#f0fdf4;color:#15803d}
+.tag-sell{background:#fff1f2;color:#be123c}
+.tag-hold{background:var(--surface);color:var(--muted2)}
+.log-text{flex:1;color:var(--text)}
+.log-sub{color:var(--muted);font-size:0.68rem}
+.log-impact{white-space:nowrap}
+
+.controls-row{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem}
+
+/* ── event popup ── */
+#eventOverlay{
+  position:fixed;inset:0;z-index:200;display:none;
+  align-items:flex-start;justify-content:center;
+  padding-top:90px;pointer-events:none;
+}
+#eventOverlay.active{display:flex}
+.event-card{
+  pointer-events:auto;
+  background:white;border:1px solid var(--border-md);
+  max-width:440px;width:calc(100% - 2rem);
+  padding:1.5rem 1.6rem;
+  box-shadow:0 12px 40px rgba(0,0,0,0.12);
+  animation:dropIn 0.35s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.event-tag{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem}
+.event-headline{font-family:'EB Garamond',Georgia,serif;font-size:1.25rem;line-height:1.3;margin-bottom:0.6rem}
+.event-body{font-family:var(--sans);font-size:0.85rem;color:var(--muted);margin-bottom:1rem}
+.event-close{font-family:var(--mono);font-size:0.65rem;color:var(--muted2);text-align:right;cursor:pointer}
+.event-close:hover{color:var(--text)}
+
+/* ── end screen ── */
+#end{display:none;border:1px solid var(--border);padding:2rem}
+#end.visible{display:block}
+.end-title{font-family:'EB Garamond',Georgia,serif;font-size:1.6rem;margin-bottom:1.5rem}
+.detail-wrap{border:1px solid var(--border);margin-bottom:1.5rem}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;font-family:var(--mono);font-size:0.78rem;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.dk{color:var(--muted)}.dv{color:var(--text)}.dv-g{color:var(--green)}.dv-r{color:var(--red)}
+
+@media(max-width:640px){
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .metric:nth-child(2n){border-right:none}
+  .metric:nth-child(n+3){border-top:1px solid var(--border)}
+  nav{padding:1rem 1.25rem}
+  main{padding:4.5rem 1.25rem 5rem}
+  .trade-actions{margin-left:0;width:100%}
+}
+
+footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.68rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<nav>
   <a class="nav-back" href="index.html">← back</a>
   <span class="nav-title">Market Simulator</span>
   <span class="nav-year" id="navYear">2026</span>
