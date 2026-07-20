@@ -23,6 +23,7 @@
   --red:#dc2626;
   --green-fill:rgba(22,163,74,0.08);
   --red-fill:rgba(220,38,38,0.08);
+  --gold:#b8860b;
   --mono:'DM Mono',monospace;
   --sans:'DM Sans',sans-serif;
 }
@@ -38,8 +39,11 @@ nav{
 }
 .nav-back{font-family:var(--mono);font-size:0.625rem;font-weight:300;letter-spacing:0.1em;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
 .nav-back:hover{color:var(--text)}
-.nav-title{font-family:'EB Garamond',Georgia,serif;font-size:0.94rem;font-weight:400;letter-spacing:0.04em;color:var(--muted);}
+.nav-title{font-family:'EB Garamond',Georgia,serif;font-size:0.94rem;font-weight:400;letter-spacing:0.04em;color:var(--muted);display:flex;align-items:center;gap:0.5rem}
 .nav-year{font-family:var(--mono);font-size:0.625rem;font-weight:300;color:var(--muted2);letter-spacing:0.08em;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);display:none;}
+.live-dot.on{display:inline-block;animation:pulseDot 1.4s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:0.25}}
 
 main{max-width:960px;margin:0 auto;padding:5.5rem 2rem 6rem}
 
@@ -48,11 +52,11 @@ main{max-width:960px;margin:0 auto;padding:5.5rem 2rem 6rem}
 h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
 .page-sub{font-size:0.82rem;color:var(--muted);font-family:var(--mono)}
 
-.sec-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.sec-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;display:flex;justify-content:space-between;align-items:baseline}
 
 /* ── setup card ── */
-#setup{border:1px solid var(--border);padding:2rem;max-width:520px}
-.field{margin-bottom:1.25rem}
+#setup{border:1px solid var(--border);padding:2rem;max-width:640px}
+.field{margin-bottom:1.5rem}
 .field label{display:block;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem}
 .field input[type="text"],.field select{
   width:100%;border:1px solid var(--border-md);background:transparent;
@@ -76,12 +80,33 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 .btn-sell:hover{background:#fff1f2}
 .btn-hold{border-color:var(--border-md);color:var(--muted)}
 .btn-hold:hover{background:var(--surface)}
+.btn-sm{padding:0.35rem 0.6rem;font-size:0.65rem}
+
+/* ── asset picker ── */
+.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem}
+.asset-card{position:relative;border:1px solid var(--border-md);padding:0.85rem 0.9rem;cursor:pointer;transition:border-color 0.15s,background 0.15s;}
+.asset-card:hover{background:var(--surface)}
+.asset-card input{position:absolute;opacity:0;pointer-events:none}
+.asset-card.checked{border-color:var(--text);background:var(--surface)}
+.asset-name{font-family:var(--mono);font-size:0.78rem;font-weight:500;margin-bottom:0.2rem}
+.asset-symbol{font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-bottom:0.45rem}
+.asset-blurb{font-family:var(--sans);font-size:0.72rem;color:var(--muted);line-height:1.4}
+.asset-vol{display:inline-block;margin-top:0.5rem;font-family:var(--mono);font-size:0.6rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted2)}
+
+.pill-row{display:flex;gap:0.5rem;flex-wrap:wrap}
+.pill{border:1px solid var(--border-md);padding:0.5rem 0.9rem;font-family:var(--mono);font-size:0.72rem;cursor:pointer;transition:background 0.15s,border-color 0.15s;position:relative}
+.pill input{position:absolute;opacity:0;pointer-events:none}
+.pill.checked{border-color:var(--text);background:var(--text);color:white}
+.pill:hover:not(.checked){background:var(--surface)}
+
+.toggle-row{display:flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.75rem;color:var(--muted)}
+.toggle-row input{width:15px;height:15px;accent-color:var(--text)}
 
 /* ── game layout ── */
 #game{display:none}
 #game.visible{display:block}
 
-.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);margin-bottom:1.5rem}
+.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);margin-bottom:1.5rem;transition:box-shadow 0.15s}
 .metric{padding:1rem 1.1rem;border-right:1px solid var(--border)}
 .metric:last-child{border-right:none}
 .metric-label{font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem}
@@ -99,14 +124,14 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 .chart-title{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
 #chartContainer{position:relative;height:260px}
 
-.trade-panel{border:1px solid var(--border);padding:1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.trade-panel{border:1px solid var(--border);padding:1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap}
 .qty-input{width:70px;border:1px solid var(--border-md);background:transparent;padding:0.55rem 0.6rem;font-family:var(--mono);font-size:0.85rem;color:var(--text);outline:none;text-align:center}
 .qty-label{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
 .trade-actions{display:flex;gap:0.6rem;margin-left:auto;flex-wrap:wrap}
 .trade-msg{font-family:var(--mono);font-size:0.7rem;color:var(--red);width:100%}
 
 .log-wrap{border:1px solid var(--border);margin-bottom:1.5rem;max-height:320px;overflow-y:auto}
-.log-row{display:flex;gap:0.75rem;align-items:baseline;padding:0.6rem 1rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:0.73rem}
+.log-row{display:flex;gap:0.75rem;align-items:baseline;padding:0.6rem 1rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:0.73rem;flex-wrap:wrap}
 .log-row:last-child{border-bottom:none}
 .log-round{color:var(--muted2);min-width:34px}
 .log-tag{padding:0.1rem 0.4rem;border-radius:2px;font-size:0.6rem;letter-spacing:0.05em;white-space:nowrap}
@@ -114,9 +139,10 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 .tag-buy{background:#f0fdf4;color:#15803d}
 .tag-sell{background:#fff1f2;color:#be123c}
 .tag-hold{background:var(--surface);color:var(--muted2)}
-.log-text{flex:1;color:var(--text)}
+.log-text{flex:1;color:var(--text);min-width:180px}
 .log-sub{color:var(--muted);font-size:0.68rem}
 .log-impact{white-space:nowrap}
+.log-ripple{width:100%;font-size:0.65rem;color:var(--muted2);padding-left:2.7rem}
 
 .controls-row{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem}
 
@@ -138,14 +164,51 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
 @keyframes dropIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
 .event-tag{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem}
 .event-headline{font-family:'EB Garamond',Georgia,serif;font-size:1.25rem;line-height:1.3;margin-bottom:0.6rem}
-.event-body{font-family:var(--sans);font-size:0.85rem;color:var(--muted);margin-bottom:1rem}
+.event-body{font-family:var(--sans);font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem}
+.event-impact{font-family:var(--mono);font-size:0.85rem;margin-bottom:0.5rem}
+.event-ripple{font-family:var(--mono);font-size:0.68rem;color:var(--muted2);margin-bottom:1rem}
 .event-close{font-family:var(--mono);font-size:0.65rem;color:var(--muted2);text-align:right;cursor:pointer}
 .event-close:hover{color:var(--text)}
+
+/* ── flash overlay ── */
+#flashOverlay{position:fixed;inset:0;z-index:150;pointer-events:none}
+#flashOverlay.flash-green{animation:flashPulse 0.8s ease-out;--flash-color:rgba(22,163,74,0.16)}
+#flashOverlay.flash-red{animation:flashPulse 0.8s ease-out;--flash-color:rgba(220,38,38,0.16)}
+@keyframes flashPulse{0%{box-shadow:inset 0 0 0 60px var(--flash-color)}100%{box-shadow:inset 0 0 0 0px rgba(0,0,0,0)}}
+
+/* ── achievement toasts ── */
+#toastWrap{position:fixed;top:70px;right:1.25rem;z-index:250;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none}
+.toast{background:var(--text);color:white;font-family:var(--mono);padding:0.7rem 1rem;max-width:260px;box-shadow:0 8px 24px rgba(0,0,0,0.18);animation:toastIn 0.3s cubic-bezier(0.16,1,0.3,1) both, toastOut 0.4s ease-in 3.6s forwards}
+.toast-title{font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:#fbbf24;margin-bottom:0.25rem}
+.toast-body{font-size:0.75rem}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(20px)}}
+
+/* ── leaderboard ── */
+.lb-panel{border:1px solid var(--border);margin-top:1rem;display:none}
+.lb-panel.open{display:block}
+.lb-row{display:flex;justify-content:space-between;padding:0.55rem 0.9rem;font-family:var(--mono);font-size:0.72rem;border-bottom:1px solid var(--border)}
+.lb-row:last-child{border-bottom:none}
+.lb-row.me{background:var(--surface)}
+.lb-rank{color:var(--muted2);width:24px}
+.lb-name{flex:1}
+.lb-meta{color:var(--muted);margin-right:0.6rem}
+.lb-empty{padding:1rem;font-family:var(--mono);font-size:0.72rem;color:var(--muted2);text-align:center}
+
+/* ── achievements strip ── */
+.ach-strip{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem}
+.ach-chip{border:1px solid var(--border-md);padding:0.4rem 0.7rem;font-family:var(--mono);font-size:0.65rem;color:var(--text);display:flex;align-items:center;gap:0.4rem}
+.ach-chip::before{content:'★';color:#d97706;font-size:0.7rem}
 
 /* ── end screen ── */
 #end{display:none;border:1px solid var(--border);padding:2rem}
 #end.visible{display:block}
-.end-title{font-family:'EB Garamond',Georgia,serif;font-size:1.6rem;margin-bottom:1.5rem}
+.end-title{font-family:'EB Garamond',Georgia,serif;font-size:1.6rem;margin-bottom:0.5rem}
+.grade-badge{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border:2px solid var(--text);font-family:var(--mono);font-size:1.4rem;margin-bottom:1.25rem}
+.grade-S{border-color:#d97706;color:#d97706}
+.grade-A,.grade-B{border-color:var(--green);color:var(--green)}
+.grade-C{border-color:var(--muted);color:var(--text)}
+.grade-D,.grade-F{border-color:var(--red);color:var(--red)}
 .detail-wrap{border:1px solid var(--border);margin-bottom:1.5rem}
 .detail-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;font-family:var(--mono);font-size:0.78rem;border-bottom:1px solid var(--border)}
 .detail-row:last-child{border-bottom:none}
@@ -158,6 +221,7 @@ h1{font-family:var(--mono);font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:400;
   nav{padding:1rem 1.25rem}
   main{padding:4.5rem 1.25rem 5rem}
   .trade-actions{margin-left:0;width:100%}
+  .asset-grid{grid-template-columns:1fr}
 }
 
 footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.68rem;color:var(--muted)}
@@ -167,7 +231,7 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
 
 <nav>
   <a class="nav-back" href="index.html">Matteo Ingram</a>
-  <span class="nav-title">Market Simulator</span>
+  <span class="nav-title"><span class="live-dot" id="liveDot"></span><span id="navAssetLabel">Market Simulator</span></span>
   <span class="nav-year" id="navYear">2026</span>
 </nav>
 
@@ -175,7 +239,7 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
   <header class="page-header">
     <div class="page-tag">Finance · Trading Simulation</div>
     <h1>Market Simulator</h1>
-    <div class="page-sub">Starting price $100.00 — the price drifts on its own, and a headline breaks every 20 seconds. Buy, sell, or hold.</div>
+    <div class="page-sub">Pick an asset class, then trade against a live feed of real-world headlines. A new headline breaks every 20 seconds, and every market reacts differently.</div>
   </header>
 
   <!-- SETUP -->
@@ -184,6 +248,17 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
       <label>Your name (optional)</label>
       <input type="text" id="playerName" placeholder="e.g. Jordan"/>
     </div>
+
+    <div class="field">
+      <label>Choose your market</label>
+      <div class="asset-grid" id="assetGrid"></div>
+    </div>
+
+    <div class="field">
+      <label>Difficulty (volatility)</label>
+      <div class="pill-row" id="difficultyRow"></div>
+    </div>
+
     <div class="field">
       <label>Session length</label>
       <select id="roundCount">
@@ -195,6 +270,7 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
       </select>
       <div class="field-hint">A new headline breaks every 20 seconds; the price keeps drifting in between.</div>
     </div>
+
     <div class="field">
       <label>Starting capital</label>
       <select id="startCapital">
@@ -203,15 +279,29 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
         <option value="100000">$100,000</option>
       </select>
     </div>
-    <button class="btn btn-primary" onclick="startGame()">Start simulation →</button>
+
+    <div class="field">
+      <label class="toggle-row" style="text-transform:none;letter-spacing:0;color:var(--text);font-size:0.8rem">
+        <input type="checkbox" id="soundToggle" checked/> Sound effects
+      </label>
+    </div>
+
+    <div class="controls-row" style="margin-bottom:0">
+      <button class="btn btn-primary" onclick="startGame()">Start simulation →</button>
+      <button class="btn btn-ghost" onclick="toggleLeaderboard()" id="lbToggleBtn">Leaderboard</button>
+    </div>
+
+    <div class="lb-panel" id="lbPanel"></div>
   </section>
 
   <!-- GAME -->
   <section id="game">
-    <div class="metrics-grid">
-      <div class="metric"><div class="metric-label">Price</div><div class="metric-value mv-neutral" id="mPrice">$100.00</div></div>
+    <div class="ach-strip" id="achStrip"></div>
+
+    <div class="metrics-grid" id="metricsGrid">
+      <div class="metric"><div class="metric-label" id="priceLabel">Price</div><div class="metric-value mv-neutral" id="mPrice">$100.00</div></div>
       <div class="metric"><div class="metric-label">Cash</div><div class="metric-value mv-neutral" id="mCash">—</div></div>
-      <div class="metric"><div class="metric-label">Shares</div><div class="metric-value mv-neutral" id="mShares">0</div></div>
+      <div class="metric"><div class="metric-label" id="posLabel">Position</div><div class="metric-value mv-neutral" id="mShares">0</div></div>
       <div class="metric"><div class="metric-label">Portfolio</div><div class="metric-value mv-neutral" id="mPortfolio">—</div></div>
       <div class="metric"><div class="metric-label">P&L</div><div class="metric-value mv-neutral" id="mPnl">—</div></div>
     </div>
@@ -225,17 +315,19 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
 
     <div class="chart-wrap">
       <div class="chart-header">
-        <span class="chart-title">Price history</span>
+        <span class="chart-title" id="chartTitle">Price history</span>
         <span class="chart-title" id="avgCostLabel"></span>
       </div>
       <div id="chartContainer">
-        <canvas id="priceChart" role="img" aria-label="Stock price over time"></canvas>
+        <canvas id="priceChart" role="img" aria-label="Asset price over time"></canvas>
       </div>
     </div>
 
     <div class="trade-panel">
-      <span class="qty-label">Qty</span>
+      <span class="qty-label" id="qtyLabel">Qty</span>
       <input class="qty-input" type="number" id="qtyInput" value="10" min="1" step="1"/>
+      <button class="btn btn-ghost btn-sm" onclick="fillMaxBuy()">Max buy</button>
+      <button class="btn btn-ghost btn-sm" onclick="fillMaxSell()">All (sell)</button>
       <span class="qty-label" id="qtyCostLabel"></span>
       <div class="trade-actions">
         <button class="btn btn-buy" onclick="doTrade('buy')">Buy</button>
@@ -257,7 +349,12 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
   <!-- END SCREEN -->
   <section id="end">
     <div class="end-title" id="endTitle">Session complete</div>
+    <div class="grade-badge" id="gradeBadge">A</div>
     <div class="detail-wrap" id="endDetail"></div>
+    <div class="sec-label">Achievements earned</div>
+    <div class="ach-strip" id="endAchStrip" style="margin-bottom:1.5rem"></div>
+    <div class="sec-label">Leaderboard</div>
+    <div class="lb-panel open" id="endLbPanel" style="margin-bottom:1.5rem"></div>
     <button class="btn btn-primary" onclick="resetGame()">Play again →</button>
   </section>
 </main>
@@ -273,86 +370,328 @@ footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;just
     <div class="event-tag" id="evTag">Breaking News</div>
     <div class="event-headline" id="evHeadline"></div>
     <div class="event-body" id="evBody"></div>
+    <div class="event-impact" id="evImpact"></div>
+    <div class="event-ripple" id="evRipple"></div>
     <div class="event-close" onclick="dismissEvent()">dismiss ×</div>
   </div>
 </div>
+
+<div id="flashOverlay"></div>
+<div id="toastWrap"></div>
 
 <script>
 document.getElementById('navYear').textContent = new Date().getFullYear();
 document.getElementById('footYear').textContent = new Date().getFullYear();
 
-/* ══════════════════ EVENT POOL ══════════════════ */
+/* ══════════════════ ASSET CLASSES ══════════════════ */
+const ASSET_CLASSES = {
+  stocks: {
+    id:'stocks', label:'Equities', short:'Equities', symbol:'ACME Corp · ACME', unit:'shares',
+    basePrice:100, decimals:2, prefix:'$', suffix:'',
+    idleVol:0.15,
+    blurb:'Single-name stock. Earnings, leadership changes and corporate actions move it most.'
+  },
+  crypto: {
+    id:'crypto', label:'Crypto', short:'Crypto', symbol:'CoinX · CX', unit:'coins',
+    basePrice:42000, decimals:2, prefix:'$', suffix:'', fractional:true,
+    idleVol:0.4,
+    blurb:'High-volatility digital asset. Regulation, hacks, ETFs and adoption news hit hard.'
+  },
+  oil: {
+    id:'oil', label:'Commodities — Crude Oil', short:'Crude Oil', symbol:'WTI Crude · CL', unit:'barrels',
+    basePrice:78, decimals:2, prefix:'$', suffix:'/bbl',
+    idleVol:0.22,
+    blurb:'Physical commodity. Driven by OPEC decisions and geopolitical supply shocks.'
+  },
+  gold: {
+    id:'gold', label:'Commodities — Gold', short:'Gold', symbol:'Gold · XAU', unit:'oz',
+    basePrice:2350, decimals:2, prefix:'$', suffix:'/oz', fractional:true,
+    idleVol:0.09,
+    blurb:'Safe-haven metal. Moves on inflation, rate expectations and crisis-driven demand.'
+  },
+  forex: {
+    id:'forex', label:'Forex — EUR/USD', short:'EUR/USD', symbol:'EUR/USD', unit:'lots',
+    basePrice:1.085, decimals:4, prefix:'', suffix:'',
+    idleVol:0.05,
+    blurb:'Currency pair. Sensitive to central bank rate divergence and eurozone politics.'
+  },
+  bonds: {
+    id:'bonds', label:'Bonds — 10Y Treasury', short:'10Y Treasury', symbol:'US10Y · T-Note', unit:'contracts',
+    basePrice:98.5, decimals:2, prefix:'$', suffix:'',
+    idleVol:0.045,
+    blurb:'Fixed income. Rate decisions and flight-to-safety flows often move it inversely to stocks.'
+  }
+};
+
+const DIFFICULTIES = {
+  calm:{label:'Calm', mult:0.6},
+  normal:{label:'Normal', mult:1},
+  volatile:{label:'Volatile', mult:1.6},
+  chaotic:{label:'Chaotic', mult:2.4}
+};
+
+/* ══════════════════ EVENT POOL ══════════════════
+   Each event carries a sensitivity per asset class so the SAME
+   headline moves every market differently (or not at all) —
+   0 means "not applicable", nonzero means "in the deck for that asset". */
 const EVENTS = [
-  {tag:'Geopolitics', headline:'Strait of Hormuz closed to tanker traffic', body:'Naval tensions disrupt one of the world’s busiest oil shipping routes.', sentiment:-1, min:4, max:11},
-  {tag:'Geopolitics', headline:'Ceasefire agreement reached in key trade region', body:'De-escalation eases fears of a prolonged supply disruption.', sentiment:1, min:3, max:8},
-  {tag:'Monetary Policy', headline:'Central bank raises interest rates by 50bps', body:'Higher borrowing costs weigh on equity valuations.', sentiment:-1, min:2, max:6},
-  {tag:'Monetary Policy', headline:'Central bank cuts interest rates unexpectedly', body:'Cheaper credit boosts risk appetite across markets.', sentiment:1, min:2, max:6},
-  {tag:'Monetary Policy', headline:'Central bank holds rates steady, as expected', body:'Policy stays unchanged; markets shrug it off.', sentiment:0, min:0, max:2},
-  {tag:'Earnings', headline:'Company beats quarterly earnings expectations', body:'Revenue and EPS both surpass analyst forecasts.', sentiment:1, min:3, max:9},
-  {tag:'Earnings', headline:'Company misses quarterly earnings, cuts guidance', body:'Weak demand forces a downward revision to the full-year outlook.', sentiment:-1, min:3, max:9},
-  {tag:'Earnings', headline:'Company reports earnings in line with estimates', body:'No surprises in the latest quarterly filing.', sentiment:0, min:0, max:2},
-  {tag:'Policy', headline:'Government announces new subsidies for the sector', body:'Tax credits and grants aim to spur investment.', sentiment:1, min:2, max:7},
-  {tag:'Policy', headline:'New tariffs announced on key imports', body:'Higher input costs threaten margins across the industry.', sentiment:-1, min:2, max:7},
-  {tag:'Regulation', headline:'Regulators open antitrust investigation', body:'Scrutiny raises uncertainty about future operations.', sentiment:-1, min:2, max:6},
-  {tag:'Regulation', headline:'Regulator approves long-awaited merger', body:'Deal clears its final hurdle, removing an overhang on the stock.', sentiment:1, min:2, max:6},
-  {tag:'Macro', headline:'Inflation data comes in hotter than expected', body:'Rising prices renew fears of tighter monetary policy.', sentiment:-1, min:2, max:5},
-  {tag:'Macro', headline:'Inflation cools more than forecast', body:'Markets rally on hopes of an easier policy path ahead.', sentiment:1, min:2, max:5},
-  {tag:'Macro', headline:'Unemployment claims rise sharply', body:'Weaker labor market data stokes recession worries.', sentiment:-1, min:2, max:6},
-  {tag:'Macro', headline:'Jobs report beats expectations', body:'Strong hiring numbers support consumer spending outlook.', sentiment:1, min:2, max:5},
-  {tag:'Supply Chain', headline:'Key supplier announces factory shutdown', body:'Production delays threaten near-term output.', sentiment:-1, min:3, max:8},
-  {tag:'Supply Chain', headline:'Shipping costs fall as congestion clears', body:'Logistics bottlenecks ease, improving margins.', sentiment:1, min:2, max:5},
-  {tag:'Innovation', headline:'Company unveils breakthrough new product', body:'Analysts raise price targets on strong early demand signals.', sentiment:1, min:3, max:9},
-  {tag:'Innovation', headline:'Product recall issued over safety concerns', body:'Reputational damage and recall costs pressure the outlook.', sentiment:-1, min:3, max:9},
-  {tag:'Market Sentiment', headline:'Major index rebalances, stock added to benchmark', body:'Passive fund inflows expected as trackers adjust holdings.', sentiment:1, min:1, max:4},
-  {tag:'Market Sentiment', headline:'Influential analyst issues a downgrade', body:'Price target cut citing valuation concerns.', sentiment:-1, min:1, max:4},
-  {tag:'Market Sentiment', headline:'Viral social media post questions company practices', body:'Sentiment turns negative online, though facts remain unverified.', sentiment:-1, min:1, max:5},
-  {tag:'Leadership', headline:'CEO announces surprise resignation', body:'Leadership uncertainty unsettles investors.', sentiment:-1, min:2, max:6},
-  {tag:'Leadership', headline:'Respected industry veteran named new CEO', body:'Markets welcome the experienced leadership hire.', sentiment:1, min:1, max:4},
-  {tag:'Natural Events', headline:'Severe weather disrupts regional operations', body:'Temporary shutdowns weigh on near-term output.', sentiment:-1, min:2, max:6},
-  {tag:'Corporate Action', headline:'Company announces share buyback program', body:'Reduced share count seen as a signal of management confidence.', sentiment:1, min:2, max:5},
-  {tag:'Corporate Action', headline:'Company issues new shares to raise capital', body:'Dilution concerns weigh on existing shareholders.', sentiment:-1, min:2, max:5},
-  {tag:'Neutral', headline:'Company holds annual shareholder meeting', body:'No major announcements; business proceeds as usual.', sentiment:0, min:0, max:2},
-  {tag:'Neutral', headline:'Trading volume stays quiet ahead of holiday', body:'Light activity leaves the stock largely directionless.', sentiment:0, min:0, max:2},
+  {tag:'Monetary Policy', headline:'Central bank raises interest rates by 50bps', body:'Higher borrowing costs weigh on equity valuations and risk assets.', mag:[2,6],
+    sensitivity:{stocks:-1, crypto:-1.3, oil:-0.3, gold:-0.7, forex:-1.1, bonds:-1.2}},
+  {tag:'Monetary Policy', headline:'Central bank cuts interest rates unexpectedly', body:'Cheaper credit boosts risk appetite across markets.', mag:[2,6],
+    sensitivity:{stocks:1, crypto:1.3, oil:0.3, gold:0.8, forex:1.1, bonds:1.3}},
+  {tag:'Monetary Policy', headline:'Central bank holds rates steady, as expected', body:'Policy stays unchanged; markets shrug it off.', mag:[0.5,2],
+    sensitivity:{stocks:0.2, crypto:0.2, oil:0, gold:0.15, forex:0.15, bonds:0.2}},
+  {tag:'Macro', headline:'Inflation data comes in hotter than expected', body:'Rising prices renew fears of tighter monetary policy.', mag:[2,5],
+    sensitivity:{stocks:-0.9, crypto:-0.6, oil:0.5, gold:0.8, forex:-0.4, bonds:-1.1}},
+  {tag:'Macro', headline:'Inflation cools more than forecast', body:'Markets rally on hopes of an easier policy path ahead.', mag:[2,5],
+    sensitivity:{stocks:0.9, crypto:0.6, oil:-0.2, gold:-0.5, forex:0.4, bonds:1.1}},
+  {tag:'Macro', headline:'Jobs report beats expectations', body:'Strong hiring numbers support consumer spending, but keep the Fed cautious.', mag:[2,5],
+    sensitivity:{stocks:0.5, crypto:0.3, oil:0.3, gold:-0.3, forex:-0.3, bonds:-0.6}},
+  {tag:'Macro', headline:'Unemployment claims rise sharply', body:'Weaker labor market data stokes recession worries and rate-cut bets.', mag:[2,6],
+    sensitivity:{stocks:-0.7, crypto:-0.5, oil:-0.4, gold:0.5, forex:0.2, bonds:0.7}},
+  {tag:'Geopolitics', headline:'Military tensions escalate in key oil-producing region', body:'Naval tensions disrupt one of the world’s busiest shipping routes.', mag:[3,10],
+    sensitivity:{stocks:-0.8, crypto:-0.4, oil:2.2, gold:0.9, forex:-0.3, bonds:0.4}},
+  {tag:'Geopolitics', headline:'Ceasefire agreement reached in key trade region', body:'De-escalation eases fears of a prolonged supply disruption.', mag:[3,8],
+    sensitivity:{stocks:0.7, crypto:0.3, oil:-1.8, gold:-0.6, forex:0.2, bonds:-0.2}},
+  {tag:'Energy', headline:'OPEC+ announces surprise production cut', body:'Tighter supply sends a jolt through global energy markets.', mag:[3,9],
+    sensitivity:{stocks:-0.2, oil:2.5, gold:0.2}},
+  {tag:'Energy', headline:'OPEC+ agrees to raise output beyond expectations', body:'Additional barrels hit the market faster than forecast.', mag:[3,9],
+    sensitivity:{stocks:0.1, oil:-2.0}},
+  {tag:'Energy', headline:'Government releases strategic petroleum reserves', body:'Emergency supply aims to cool prices at the pump.', mag:[2,6],
+    sensitivity:{oil:-1.3}},
+  {tag:'Energy', headline:'Major pipeline attacked, supply disrupted', body:'Sabotage knocks a key transit route offline indefinitely.', mag:[3,8],
+    sensitivity:{oil:1.8, gold:0.3, stocks:-0.2}},
+  {tag:'Energy', headline:'Refinery fire cuts regional fuel output', body:'Unplanned outage tightens near-term supply.', mag:[2,5],
+    sensitivity:{oil:1.2}},
+  {tag:'Commodities', headline:'Central banks increase gold reserves at record pace', body:'Official-sector buying underpins bullion demand.', mag:[2,5],
+    sensitivity:{gold:1.3}},
+  {tag:'Currencies', headline:'Dollar index hits multi-year high', body:'A stronger dollar pressures dollar-priced assets worldwide.', mag:[2,5],
+    sensitivity:{gold:-1.0, forex:-1.2, crypto:-0.4}},
+  {tag:'Crypto', headline:'Major exchange suffers security breach', body:'Millions in customer funds reported frozen or stolen.', mag:[4,10],
+    sensitivity:{crypto:-2.5, stocks:-0.1}},
+  {tag:'Crypto', headline:'Regulator announces sweeping crypto trading crackdown', body:'New enforcement action targets major platforms.', mag:[3,9],
+    sensitivity:{crypto:-2.2}},
+  {tag:'Crypto', headline:'Spot ETF approved for major cryptocurrency', body:'Regulated access opens the door to institutional inflows.', mag:[3,9],
+    sensitivity:{crypto:2.3, stocks:0.1}},
+  {tag:'Crypto', headline:'Network completes scheduled halving event', body:'Issuance rate drops, tightening new supply.', mag:[2,6],
+    sensitivity:{crypto:1.0}},
+  {tag:'Crypto', headline:'Major stablecoin de-pegs from the dollar', body:'Confidence in a key settlement asset is shaken.', mag:[3,8],
+    sensitivity:{crypto:-1.8}},
+  {tag:'Crypto', headline:'Institutional giant announces crypto adoption plan', body:'A household-name balance sheet allocates to digital assets.', mag:[2,6],
+    sensitivity:{crypto:1.6}},
+  {tag:'Crypto', headline:'Whale wallet dumps large token holdings', body:'A single large sell order rattles thin order books.', mag:[2,5],
+    sensitivity:{crypto:-1.1}},
+  {tag:'Currencies', headline:'ECB signals hawkish pivot on rates', body:'Policymakers hint at faster tightening than markets priced in.', mag:[2,5],
+    sensitivity:{forex:1.2, bonds:-0.3, stocks:-0.2}},
+  {tag:'Geopolitics', headline:'Eurozone political crisis deepens', body:'Coalition instability raises questions about fiscal policy.', mag:[2,6],
+    sensitivity:{forex:-1.5, stocks:-0.3, gold:0.3}},
+  {tag:'Fiscal Policy', headline:'Government debt-ceiling standoff rattles markets', body:'Investors weigh the odds of a technical default.', mag:[2,6],
+    sensitivity:{bonds:-1.0, gold:0.7, stocks:-0.6, forex:-0.3}},
+  {tag:'Credit', headline:'Ratings agency downgrades sovereign credit rating', body:'Higher borrowing costs loom for government debt.', mag:[3,7],
+    sensitivity:{bonds:-1.6, stocks:-0.4, gold:0.4}},
+  {tag:'Credit', headline:'Weak demand seen at government bond auction', body:'Investors demand a higher yield to absorb new supply.', mag:[2,5],
+    sensitivity:{bonds:-1.3, forex:-0.2}},
+  {tag:'Macro', headline:'Flight-to-safety bid lifts government bonds', body:'Risk-off sentiment sends investors toward safer assets.', mag:[2,5],
+    sensitivity:{bonds:1.2, gold:0.4, stocks:-0.3}},
+  {tag:'Earnings', headline:'Company beats quarterly earnings expectations', body:'Revenue and EPS both surpass analyst forecasts.', mag:[3,9],
+    sensitivity:{stocks:1.3}},
+  {tag:'Earnings', headline:'Company misses quarterly earnings, cuts guidance', body:'Weak demand forces a downward revision to the full-year outlook.', mag:[3,9],
+    sensitivity:{stocks:-1.3}},
+  {tag:'Earnings', headline:'Company reports earnings in line with estimates', body:'No surprises in the latest quarterly filing.', mag:[0.5,2],
+    sensitivity:{stocks:0.2}},
+  {tag:'Regulation', headline:'Regulators open antitrust investigation', body:'Scrutiny raises uncertainty about future operations.', mag:[2,6],
+    sensitivity:{stocks:-0.7}},
+  {tag:'Regulation', headline:'Regulator approves long-awaited merger', body:'Deal clears its final hurdle, removing an overhang on the stock.', mag:[2,6],
+    sensitivity:{stocks:0.7}},
+  {tag:'Supply Chain', headline:'Key supplier announces factory shutdown', body:'Production delays threaten near-term output.', mag:[2,6],
+    sensitivity:{stocks:-0.6, oil:0.2}},
+  {tag:'Supply Chain', headline:'Shipping costs fall as congestion clears', body:'Logistics bottlenecks ease, improving margins.', mag:[2,5],
+    sensitivity:{stocks:0.4, oil:-0.2}},
+  {tag:'Innovation', headline:'Company unveils breakthrough new product', body:'Analysts raise price targets on strong early demand signals.', mag:[3,9],
+    sensitivity:{stocks:1.1}},
+  {tag:'Innovation', headline:'Product recall issued over safety concerns', body:'Reputational damage and recall costs pressure the outlook.', mag:[3,9],
+    sensitivity:{stocks:-1.1}},
+  {tag:'Corporate Action', headline:'Company announces share buyback program', body:'Reduced share count seen as a signal of management confidence.', mag:[2,5],
+    sensitivity:{stocks:0.5}},
+  {tag:'Corporate Action', headline:'Company issues new shares to raise capital', body:'Dilution concerns weigh on existing shareholders.', mag:[2,5],
+    sensitivity:{stocks:-0.5}},
+  {tag:'Leadership', headline:'CEO announces surprise resignation', body:'Leadership uncertainty unsettles investors.', mag:[2,6],
+    sensitivity:{stocks:-0.6}},
+  {tag:'Leadership', headline:'Respected industry veteran named new CEO', body:'Markets welcome the experienced leadership hire.', mag:[1,4],
+    sensitivity:{stocks:0.4}},
+  {tag:'Natural Events', headline:'Severe weather disrupts regional operations', body:'Temporary shutdowns weigh on near-term output.', mag:[2,6],
+    sensitivity:{stocks:-0.4, oil:0.5, gold:0.1}},
+  {tag:'Market Sentiment', headline:'Major index rebalances, stock added to benchmark', body:'Passive fund inflows expected as trackers adjust holdings.', mag:[1,4],
+    sensitivity:{stocks:0.4}},
+  {tag:'Market Sentiment', headline:'Influential analyst issues a downgrade', body:'Price target cut citing valuation concerns.', mag:[1,4],
+    sensitivity:{stocks:-0.4}},
+  {tag:'Market Sentiment', headline:'Viral social media post questions company practices', body:'Sentiment turns negative online, though facts remain unverified.', mag:[1,5],
+    sensitivity:{stocks:-0.4, crypto:-0.3}},
+  {tag:'Neutral', headline:'Trading stays quiet ahead of a holiday weekend', body:'Light activity leaves markets largely directionless.', mag:[0.5,1.5],
+    sensitivity:{stocks:0.1, crypto:0.1, oil:0.1, gold:0.1, forex:0.1, bonds:0.1}},
+  {tag:'Neutral', headline:'Annual shareholder meeting proceeds without incident', body:'No major announcements; business as usual.', mag:[0.3,1],
+    sensitivity:{stocks:0.1}},
 ];
+
+/* ══════════════════ ACHIEVEMENTS ══════════════════ */
+const ACHIEVEMENTS = [
+  {id:'first_trade', label:'First Trade', desc:'Executed your first buy or sell.'},
+  {id:'buy_dip', label:'Buy the Dip', desc:'Bought within 5s of a negative headline.'},
+  {id:'sell_rip', label:'Sell the Rip', desc:'Sold within 5s of a positive headline.'},
+  {id:'diamond_hands', label:'Diamond Hands', desc:'Held your position through an 8%+ shock.'},
+  {id:'double_up', label:'Double Up', desc:'Portfolio reached 2x starting capital.'},
+  {id:'underwater', label:'Underwater', desc:'Portfolio fell below half of starting capital.'},
+  {id:'active_trader', label:'Active Trader', desc:'Executed 10+ trades in one session.'},
+  {id:'steady_hand', label:'Steady Hand', desc:'Finished a full session without a single trade.'},
+];
+const ACH_BY_ID = Object.fromEntries(ACHIEVEMENTS.map(a=>[a.id,a]));
 
 /* ══════════════════ STATE ══════════════════ */
 let state = null;
 let priceChart = null;
-let timerUiInterval = null;   // 100ms countdown-bar updater
-let priceInterval = null;     // price random-walk / impact-easing updater
+let timerUiInterval = null;
+let priceInterval = null;
 let roundTimeout = null;
 let timerStart = 0;
 let timerRemaining = 20000;
 let paused = false;
 let pauseStart = 0;
 let lastEventCard = null;
+let audioCtx = null;
 
-const ROUND_MS = 20000;   // time between headlines
-const TICK_MS = 500;      // price update resolution (2x/sec)
-const IMPACT_MS = 3000;   // time for price to ease toward the news-driven target
-const IDLE_VOL = 0.15;    // max % random-walk step per tick when no news is resolving
-const MAX_HISTORY = 2400; // ~20 min of ticks kept on the chart
+const ROUND_MS = 20000;
+const TICK_MS = 500;
+const IMPACT_MS = 3000;
+const MAX_HISTORY = 2400;
 
 function fmtMoney(v){
   const s = v<0 ? '-' : '';
   return s + '$' + Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 }
+function fmtPrice(v, asset){
+  return asset.prefix + v.toLocaleString(undefined,{minimumFractionDigits:asset.decimals,maximumFractionDigits:asset.decimals}) + asset.suffix;
+}
 
-function newState(name, rounds, capital){
+/* ══════════════════ SOUND ══════════════════ */
+function ensureAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, dur, type, vol){
+  if(!state || !state.soundOn) return;
+  try{
+    const ctx = ensureAudio();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function sfxBuy(){ playTone(660,0.1,'square',0.04); }
+function sfxSell(){ playTone(440,0.1,'square',0.04); }
+function sfxNewsUp(){ playTone(523,0.12,'sine',0.05); setTimeout(()=>playTone(784,0.15,'sine',0.05),90); }
+function sfxNewsDown(){ playTone(392,0.14,'sine',0.05); setTimeout(()=>playTone(261,0.18,'sine',0.05),90); }
+function sfxAchievement(){ playTone(880,0.09,'triangle',0.05); setTimeout(()=>playTone(1174,0.14,'triangle',0.05),100); }
+
+/* ══════════════════ SETUP UI: asset + difficulty pickers ══════════════════ */
+let selectedAsset = 'stocks';
+let selectedDifficulty = 'normal';
+
+function renderAssetGrid(){
+  const grid = document.getElementById('assetGrid');
+  grid.innerHTML = Object.values(ASSET_CLASSES).map(a => `
+    <label class="asset-card ${a.id===selectedAsset?'checked':''}" data-asset="${a.id}">
+      <input type="radio" name="assetPick" value="${a.id}" ${a.id===selectedAsset?'checked':''}/>
+      <div class="asset-name">${a.short}</div>
+      <div class="asset-symbol">${a.symbol} · starts at ${fmtPrice(a.basePrice, a)}</div>
+      <div class="asset-blurb">${a.blurb}</div>
+      <div class="asset-vol">Volatility: ${a.idleVol >= 0.3 ? 'High' : a.idleVol >= 0.12 ? 'Medium' : 'Low'}</div>
+    </label>
+  `).join('');
+  grid.querySelectorAll('.asset-card').forEach(card => {
+    card.addEventListener('click', () => {
+      selectedAsset = card.dataset.asset;
+      grid.querySelectorAll('.asset-card').forEach(c=>c.classList.toggle('checked', c.dataset.asset===selectedAsset));
+    });
+  });
+}
+function renderDifficultyRow(){
+  const row = document.getElementById('difficultyRow');
+  row.innerHTML = Object.entries(DIFFICULTIES).map(([id,d]) => `
+    <label class="pill ${id===selectedDifficulty?'checked':''}" data-diff="${id}">
+      <input type="radio" name="diffPick" value="${id}" ${id===selectedDifficulty?'checked':''}/>${d.label}
+    </label>
+  `).join('');
+  row.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', () => {
+      selectedDifficulty = p.dataset.diff;
+      row.querySelectorAll('.pill').forEach(x=>x.classList.toggle('checked', x.dataset.diff===selectedDifficulty));
+    });
+  });
+}
+renderAssetGrid();
+renderDifficultyRow();
+
+/* ══════════════════ LEADERBOARD (localStorage) ══════════════════ */
+function loadLeaderboard(){
+  try{ return JSON.parse(localStorage.getItem('msim_leaderboard')||'[]'); }catch(e){ return []; }
+}
+function saveLeaderboard(arr){
+  localStorage.setItem('msim_leaderboard', JSON.stringify(arr.slice(0,10)));
+}
+function addToLeaderboard(entry){
+  const arr = loadLeaderboard();
+  arr.push(entry);
+  arr.sort((a,b)=>b.returnPct-a.returnPct);
+  saveLeaderboard(arr);
+  return arr;
+}
+function renderLeaderboardInto(elId, highlightLast){
+  const el = document.getElementById(elId);
+  const arr = loadLeaderboard();
+  if(arr.length === 0){
+    el.innerHTML = '<div class="lb-empty">No sessions recorded yet. Play one to set the first score.</div>';
+    return;
+  }
+  el.innerHTML = arr.slice(0,10).map((e,i) => `
+    <div class="lb-row ${highlightLast && i===arr.indexOf(highlightLast)?'me':''}">
+      <span class="lb-rank">${i+1}.</span>
+      <span class="lb-name">${e.name}</span>
+      <span class="lb-meta">${e.asset} · ${e.difficulty}</span>
+      <span class="${e.returnPct>=0?'dv-g':'dv-r'}">${e.returnPct>=0?'+':''}${e.returnPct.toFixed(1)}%</span>
+    </div>
+  `).join('');
+}
+function toggleLeaderboard(){
+  const panel = document.getElementById('lbPanel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')) renderLeaderboardInto('lbPanel', null);
+}
+
+/* ══════════════════ NEW GAME STATE ══════════════════ */
+function newState(name, rounds, capital, assetId, difficultyId, soundOn){
+  const asset = ASSET_CLASSES[assetId];
   return {
     name: name || 'Trader',
+    asset, difficulty: difficultyId, soundOn,
     totalRounds: rounds,
     round: 0,
     cash: capital,
     startCash: capital,
     shares: 0,
     avgCost: 0,
-    price: 100,
+    price: asset.basePrice,
     tickCount: 0,
-    history: [{t:0, price:100}],
-    impact: null, // {fromPrice, toPrice, startTime, duration} while a headline is resolving
-    eventDeck: shuffledDeck(),
+    history: [{t:0, price: asset.basePrice}],
+    impact: null,
+    eventDeck: shuffledDeck(asset.id),
     log: [],
+    achievements: new Set(),
+    tradesCount: 0,
+    lastNewsAt: 0,
+    lastNewsImpactPct: 0,
     ended: false,
   };
 }
@@ -362,14 +701,30 @@ function startGame(){
   const name = document.getElementById('playerName').value.trim();
   const rounds = parseInt(document.getElementById('roundCount').value, 10);
   const capital = parseFloat(document.getElementById('startCapital').value);
+  const soundOn = document.getElementById('soundToggle').checked;
 
-  state = newState(name, rounds, capital);
+  state = newState(name, rounds, capital, selectedAsset, selectedDifficulty, soundOn);
   paused = false;
   document.getElementById('pauseBtn').textContent = 'Pause';
+  document.getElementById('liveDot').classList.add('on');
+  document.getElementById('navAssetLabel').textContent = state.asset.symbol;
 
   document.getElementById('setup').style.display = 'none';
   document.getElementById('end').classList.remove('visible');
   document.getElementById('game').classList.add('visible');
+
+  document.getElementById('priceLabel').textContent = state.asset.short + ' Price';
+  document.getElementById('posLabel').textContent = 'Position (' + state.asset.unit + ')';
+  document.getElementById('qtyLabel').textContent = 'Qty (' + state.asset.unit + ')';
+  document.getElementById('chartTitle').textContent = state.asset.short + ' — price history';
+
+  const qtyEl = document.getElementById('qtyInput');
+  qtyEl.step = state.asset.fractional ? '0.0001' : '1';
+  qtyEl.value = state.asset.fractional
+    ? Math.max(0.0001, Math.round((capital*0.1/state.price)*10000)/10000)
+    : Math.max(1, Math.floor(capital*0.1/state.price) || 1);
+
+  if(soundOn) ensureAudio();
 
   renderAll();
   buildChart();
@@ -385,9 +740,13 @@ function resetGame(){
   document.getElementById('end').classList.remove('visible');
   document.getElementById('setup').style.display = 'block';
   document.getElementById('logWrap').innerHTML = '';
+  document.getElementById('liveDot').classList.remove('on');
+  document.getElementById('navAssetLabel').textContent = 'Market Simulator';
+  renderAssetGrid();
+  renderDifficultyRow();
 }
 
-/* ══════════════════ ROUND TIMER (headline cadence) ══════════════════ */
+/* ══════════════════ ROUND TIMER ══════════════════ */
 function startRoundTimer(){
   timerRemaining = ROUND_MS;
   timerStart = Date.now();
@@ -420,7 +779,7 @@ function togglePause(){
   } else {
     const pausedFor = Date.now() - pauseStart;
     timerStart = Date.now() - (ROUND_MS - timerRemaining);
-    if(state.impact) state.impact.startTime += pausedFor; // don't let paused time count as animation progress
+    if(state.impact) state.impact.startTime += pausedFor;
     timerUiInterval = setInterval(updateTimerUI, 100);
     roundTimeout = setTimeout(runRound, timerRemaining);
     priceInterval = setInterval(tick, TICK_MS);
@@ -428,31 +787,26 @@ function togglePause(){
   }
 }
 
-/* ══════════════════ PRICE MOTION ══════════════════
-   Every TICK_MS, the price either:
-   - drifts in a small random walk (idle, no news resolving), or
-   - eases toward the target set by the latest headline over IMPACT_MS,
-     so students watch it move and can trade mid-move.
-   ══════════════════════════════════════════════════ */
+/* ══════════════════ PRICE MOTION ══════════════════ */
 function tick(){
   if(!state || state.ended || paused) return;
   const now = Date.now();
+  const volMult = DIFFICULTIES[state.difficulty].mult;
 
   if(state.impact){
     const elapsed = now - state.impact.startTime;
     const t = Math.min(1, elapsed / state.impact.duration);
-    const eased = 1 - Math.pow(1-t, 2); // ease-out
+    const eased = 1 - Math.pow(1-t, 2);
     let p = state.impact.fromPrice + (state.impact.toPrice - state.impact.fromPrice) * eased;
-    p *= 1 + (Math.random()-0.5) * 0.001; // tiny texture so it doesn't look robotic
-    state.price = Math.max(1, Math.round(p*100)/100);
+    p *= 1 + (Math.random()-0.5) * 0.001;
+    state.price = Math.max(0.0001, p);
     if(t >= 1){
-      state.price = Math.max(1, state.impact.toPrice);
+      state.price = Math.max(0.0001, state.impact.toPrice);
       state.impact = null;
     }
   } else {
-    const step = (Math.random()-0.5) * 2 * IDLE_VOL;
-    const p = state.price * (1 + step/100);
-    state.price = Math.max(1, Math.round(p*100)/100);
+    const step = (Math.random()-0.5) * 2 * state.asset.idleVol * volMult;
+    state.price = Math.max(0.0001, state.price * (1 + step/100));
   }
 
   state.tickCount++;
@@ -464,14 +818,10 @@ function tick(){
   updateChart();
 }
 
-/* ══════════════════ HEADLINE / ROUND LOGIC ══════════════════
-   Events are dealt from a shuffled deck (not pure independent
-   random draws) so a session can't streak into all-positive or
-   all-negative news by chance — every event in the pool gets
-   played once before any repeats.
-   ══════════════════════════════════════════════════ */
-function shuffledDeck(){
-  const arr = [...EVENTS];
+/* ══════════════════ HEADLINE / ROUND LOGIC ══════════════════ */
+function shuffledDeck(assetId){
+  const relevant = EVENTS.filter(ev => ev.sensitivity[assetId]);
+  const arr = [...relevant];
   for(let i = arr.length-1; i>0; i--){
     const j = Math.floor(Math.random()*(i+1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -481,7 +831,7 @@ function shuffledDeck(){
 
 function pickEvent(){
   if(!state.eventDeck || state.eventDeck.length === 0){
-    state.eventDeck = shuffledDeck();
+    state.eventDeck = shuffledDeck(state.asset.id);
     if(state.eventDeck[0] === lastEventCard && state.eventDeck.length > 1){
       [state.eventDeck[0], state.eventDeck[1]] = [state.eventDeck[1], state.eventDeck[0]];
     }
@@ -491,44 +841,79 @@ function pickEvent(){
   return ev;
 }
 
+function otherAssetImpacts(ev, magnitude, volMult){
+  return Object.keys(ASSET_CLASSES)
+    .filter(k => k !== state.asset.id && ev.sensitivity[k])
+    .map(k => ({
+      label: ASSET_CLASSES[k].short,
+      pct: ev.sensitivity[k] * magnitude * volMult
+    }))
+    .sort((a,b) => Math.abs(b.pct) - Math.abs(a.pct))
+    .slice(0,2);
+}
+
 function runRound(){
   if(!state || state.ended) return;
   state.round++;
 
+  const volMult = DIFFICULTIES[state.difficulty].mult;
   const ev = pickEvent();
-  const magnitude = ev.min + Math.random()*(ev.max - ev.min);
-  const noise = (Math.random()-0.5)*2; // +/-1% jitter regardless of sentiment
-  const pct = ev.sentiment * magnitude + noise;
+  const sens = ev.sensitivity[state.asset.id];
+  const magnitude = ev.mag[0] + Math.random()*(ev.mag[1]-ev.mag[0]);
+  const noise = (Math.random()-0.5)*2;
+  const pct = (sens * magnitude * volMult) + noise;
 
   const fromPrice = state.price;
-  let toPrice = fromPrice * (1 + pct/100);
-  toPrice = Math.max(1, Math.round(toPrice*100)/100);
+  let toPrice = Math.max(0.0001, fromPrice * (1 + pct/100));
 
   const impact = toPrice - fromPrice;
   const impactPct = (impact/fromPrice)*100;
+  const ripple = otherAssetImpacts(ev, magnitude, volMult);
+
+  state.lastNewsAt = Date.now();
+  state.lastNewsImpactPct = impactPct;
+
+  if(impactPct <= -8 && state.shares > 0) unlockAchievement('diamond_hands');
+
   state.log.unshift({
     round: state.round, type:'news', tag: ev.tag,
-    text: ev.headline, impact, impactPct
+    text: ev.headline, impact, impactPct, ripple
   });
 
-  // Don't snap the price — hand it to the ticker to ease toward the target
-  // over IMPACT_MS so students see it move before it settles.
   state.impact = { fromPrice, toPrice, startTime: Date.now(), duration: IMPACT_MS };
 
-  showEventPopup(ev, impact, impactPct);
+  if(Math.abs(impactPct) >= 3) flashScreen(impactPct >= 0 ? 'green' : 'red');
+  if(Math.abs(impactPct) >= 1.5){ impactPct >= 0 ? sfxNewsUp() : sfxNewsDown(); }
+
+  showEventPopup(ev, impact, impactPct, ripple);
   renderAll();
 
   if(state.totalRounds > 0 && state.round >= state.totalRounds){
-    setTimeout(() => endGame(false), IMPACT_MS + 200); // let the move finish playing out first
+    setTimeout(() => endGame(false), IMPACT_MS + 200);
     return;
   }
   startRoundTimer();
 }
 
-function showEventPopup(ev, impact, impactPct){
+function flashScreen(color){
+  const el = document.getElementById('flashOverlay');
+  el.classList.remove('flash-green','flash-red');
+  void el.offsetWidth;
+  el.classList.add(color === 'green' ? 'flash-green' : 'flash-red');
+}
+
+function showEventPopup(ev, impact, impactPct, ripple){
   document.getElementById('evTag').textContent = ev.tag + ' · Breaking News';
   document.getElementById('evHeadline').textContent = ev.headline;
   document.getElementById('evBody').textContent = ev.body;
+  const sign = impact >= 0 ? '+' : '';
+  const impactEl = document.getElementById('evImpact');
+  impactEl.textContent = `${state.asset.short}: ${sign}${impactPct.toFixed(2)}%`;
+  impactEl.className = 'event-impact ' + (impact > 0 ? 'dv-g' : impact < 0 ? 'dv-r' : '');
+  const rippleEl = document.getElementById('evRipple');
+  rippleEl.textContent = ripple.length
+    ? 'Also moving: ' + ripple.map(r => `${r.label} ${r.pct>=0?'+':''}${r.pct.toFixed(1)}%`).join(' · ')
+    : '';
   const overlay = document.getElementById('eventOverlay');
   overlay.classList.add('active');
   clearTimeout(showEventPopup._t);
@@ -538,11 +923,48 @@ function dismissEvent(){
   document.getElementById('eventOverlay').classList.remove('active');
 }
 
+/* ══════════════════ ACHIEVEMENTS ══════════════════ */
+function unlockAchievement(id){
+  if(!state || state.achievements.has(id)) return;
+  state.achievements.add(id);
+  const def = ACH_BY_ID[id];
+  showToast(def.label, def.desc);
+  sfxAchievement();
+  renderAchStrip();
+}
+function showToast(title, body){
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-title">Achievement unlocked</div><div class="toast-body"><strong>${title}</strong><br>${body}</div>`;
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 4200);
+}
+function renderAchStrip(){
+  const strip = document.getElementById('achStrip');
+  if(!state || state.achievements.size === 0){ strip.innerHTML=''; return; }
+  strip.innerHTML = [...state.achievements].map(id => `<div class="ach-chip">${ACH_BY_ID[id].label}</div>`).join('');
+}
+
 /* ══════════════════ TRADING ══════════════════ */
+function fillMaxBuy(){
+  if(!state) return;
+  const raw = state.cash / state.price;
+  const max = state.asset.fractional ? Math.floor(raw*10000)/10000 : Math.floor(raw);
+  document.getElementById('qtyInput').value = Math.max(0, max);
+  renderMetrics();
+}
+function fillMaxSell(){
+  if(!state) return;
+  document.getElementById('qtyInput').value = state.shares;
+  renderMetrics();
+}
+
 function doTrade(action){
   const msgEl = document.getElementById('tradeMsg');
   msgEl.textContent = '';
-  const qty = Math.max(0, Math.floor(parseFloat(document.getElementById('qtyInput').value) || 0));
+  const raw = parseFloat(document.getElementById('qtyInput').value) || 0;
+  const qty = Math.max(0, state.asset.fractional ? Math.round(raw*10000)/10000 : Math.floor(raw));
 
   if(action === 'hold'){
     state.log.unshift({round: state.round, type:'hold', text:'Held position', qty:0});
@@ -554,6 +976,7 @@ function doTrade(action){
     return;
   }
   const cost = qty * state.price;
+  const recentNews = (Date.now() - state.lastNewsAt) < 5000;
 
   if(action === 'buy'){
     if(cost > state.cash + 1e-9){
@@ -565,17 +988,26 @@ function doTrade(action){
       : state.price;
     state.cash -= cost;
     state.shares += qty;
-    state.log.unshift({round: state.round, type:'buy', text:`Bought ${qty} @ ${fmtMoney(state.price)}`, qty});
+    state.tradesCount++;
+    state.log.unshift({round: state.round, type:'buy', text:`Bought ${qty} @ ${fmtPrice(state.price, state.asset)}`, qty});
+    sfxBuy();
+    unlockAchievement('first_trade');
+    if(recentNews && state.lastNewsImpactPct <= -5) unlockAchievement('buy_dip');
   } else if(action === 'sell'){
     if(qty > state.shares){
-      msgEl.textContent = 'You don’t own that many shares.';
+      msgEl.textContent = 'You don’t own that many ' + state.asset.unit + '.';
       return;
     }
     state.cash += cost;
     state.shares -= qty;
     if(state.shares === 0) state.avgCost = 0;
-    state.log.unshift({round: state.round, type:'sell', text:`Sold ${qty} @ ${fmtMoney(state.price)}`, qty});
+    state.tradesCount++;
+    state.log.unshift({round: state.round, type:'sell', text:`Sold ${qty} @ ${fmtPrice(state.price, state.asset)}`, qty});
+    sfxSell();
+    unlockAchievement('first_trade');
+    if(recentNews && state.lastNewsImpactPct >= 5) unlockAchievement('sell_rip');
   }
+  if(state.tradesCount >= 10) unlockAchievement('active_trader');
   renderAll();
 }
 
@@ -583,12 +1015,13 @@ function doTrade(action){
 function renderAll(){
   renderMetrics();
   renderLog();
+  renderAchStrip();
 }
 
 function renderMetrics(){
-  document.getElementById('mPrice').textContent = fmtMoney(state.price);
+  document.getElementById('mPrice').textContent = fmtPrice(state.price, state.asset);
   document.getElementById('mCash').textContent = fmtMoney(state.cash);
-  document.getElementById('mShares').textContent = state.shares.toLocaleString();
+  document.getElementById('mShares').textContent = state.shares.toLocaleString(undefined, {maximumFractionDigits: state.asset.fractional ? 4 : 0});
 
   const portfolioValue = state.cash + state.shares*state.price;
   document.getElementById('mPortfolio').textContent = fmtMoney(portfolioValue);
@@ -599,8 +1032,11 @@ function renderMetrics(){
   pnlEl.textContent = (pnl>=0?'+':'') + fmtMoney(pnl) + ' (' + (pnlPct>=0?'+':'') + pnlPct.toFixed(1) + '%)';
   pnlEl.className = 'metric-value ' + (pnl > 0 ? 'mv-green' : pnl < 0 ? 'mv-red' : 'mv-neutral');
 
+  if(portfolioValue >= state.startCash * 2) unlockAchievement('double_up');
+  if(portfolioValue <= state.startCash * 0.5) unlockAchievement('underwater');
+
   document.getElementById('avgCostLabel').textContent = state.shares > 0
-    ? 'avg cost ' + fmtMoney(state.avgCost) : '';
+    ? 'avg cost ' + fmtPrice(state.avgCost, state.asset) : '';
 
   const roundLabel = document.getElementById('roundLabel');
   roundLabel.textContent = state.totalRounds > 0
@@ -615,12 +1051,15 @@ function renderLog(){
   const wrap = document.getElementById('logWrap');
   if(state.log.length === 0){ wrap.innerHTML = ''; return; }
   wrap.innerHTML = state.log.map(entry => {
-    let tagClass, tagText, extra = '';
+    let tagClass, tagText, extra = '', rippleLine = '';
     if(entry.type === 'news'){
       tagClass = 'tag-news'; tagText = 'NEWS';
       const sign = entry.impact >= 0 ? '+' : '';
       const cls = entry.impact > 0 ? 'dv-g' : entry.impact < 0 ? 'dv-r' : '';
       extra = `<span class="log-impact ${cls}">${sign}${entry.impact.toFixed(2)} (${sign}${entry.impactPct.toFixed(1)}%)</span>`;
+      if(entry.ripple && entry.ripple.length){
+        rippleLine = `<div class="log-ripple">Also moving: ${entry.ripple.map(r=>`${r.label} ${r.pct>=0?'+':''}${r.pct.toFixed(1)}%`).join(' · ')}</div>`;
+      }
     } else if(entry.type === 'buy'){ tagClass='tag-buy'; tagText='BUY'; }
     else if(entry.type === 'sell'){ tagClass='tag-sell'; tagText='SELL'; }
     else { tagClass='tag-hold'; tagText='HOLD'; }
@@ -630,6 +1069,7 @@ function renderLog(){
       <span class="log-tag ${tagClass}">${tagText}</span>
       <span class="log-text">${entry.text}${entry.tag ? ` <span class="log-sub">— ${entry.tag}</span>` : ''}</span>
       ${extra}
+      ${rippleLine}
     </div>`;
   }).join('');
 }
@@ -637,6 +1077,7 @@ function renderLog(){
 /* ══════════════════ CHART ══════════════════ */
 function buildChart(){
   if(priceChart){ priceChart.destroy(); priceChart = null; }
+  const base = state.asset.basePrice;
   priceChart = new Chart(document.getElementById('priceChart'), {
     type:'line',
     data:{
@@ -648,7 +1089,7 @@ function buildChart(){
         borderWidth:1.5,
         pointRadius:0,
         tension:0.15,
-        fill:{target:{value:100}, above:'rgba(22,163,74,0.06)', below:'rgba(220,38,38,0.06)'}
+        fill:{target:{value:base}, above:'rgba(22,163,74,0.06)', below:'rgba(220,38,38,0.06)'}
       }]
     },
     options:{
@@ -664,13 +1105,13 @@ function buildChart(){
           padding:10,
           callbacks:{
             title: ctx => 'T+' + ctx[0].label + 's',
-            label: ctx => 'Price: $' + ctx.raw.toFixed(2)
+            label: ctx => 'Price: ' + fmtPrice(ctx.raw, state.asset)
           }
         }
       },
       scales:{
         x:{ ticks:{color:'#bbb', font:{family:'DM Mono', size:10}, callback:v=>v+'s'}, grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'rgba(0,0,0,0.1)'} },
-        y:{ ticks:{color:'#bbb', font:{family:'DM Mono', size:10}, callback:v=>'$'+v.toFixed(0)}, grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'rgba(0,0,0,0.1)'} }
+        y:{ ticks:{color:'#bbb', font:{family:'DM Mono', size:10}, callback:v=>fmtPrice(v, state.asset)}, grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'rgba(0,0,0,0.1)'} }
       }
     }
   });
@@ -682,6 +1123,16 @@ function updateChart(){
   priceChart.update('none');
 }
 
+/* ══════════════════ GRADE ══════════════════ */
+function gradeFor(pct){
+  if(pct >= 50) return 'S';
+  if(pct >= 25) return 'A';
+  if(pct >= 10) return 'B';
+  if(pct >= 0)  return 'C';
+  if(pct >= -15) return 'D';
+  return 'F';
+}
+
 /* ══════════════════ END GAME ══════════════════ */
 function endGame(manual){
   if(!state || state.ended) return;
@@ -690,6 +1141,9 @@ function endGame(manual){
   clearTimeout(roundTimeout);
   clearInterval(priceInterval);
   dismissEvent();
+  document.getElementById('liveDot').classList.remove('on');
+
+  if(state.tradesCount === 0) unlockAchievement('steady_hand');
 
   const portfolioValue = state.cash + state.shares*state.price;
   const pnl = portfolioValue - state.startCash;
@@ -701,12 +1155,19 @@ function endGame(manual){
   document.getElementById('endTitle').textContent =
     `${state.name}'s session complete${manual ? ' (ended early)' : ''}`;
 
+  const grade = gradeFor(pnlPct);
+  const badge = document.getElementById('gradeBadge');
+  badge.textContent = grade;
+  badge.className = 'grade-badge grade-' + grade;
+
   const rows = [
+    ['Market traded', state.asset.label, 'dv'],
+    ['Difficulty', DIFFICULTIES[state.difficulty].label, 'dv'],
     ['Starting capital', fmtMoney(state.startCash), 'dv'],
     ['Final portfolio value', fmtMoney(portfolioValue), 'dv'],
     ['Total P&L', (pnl>=0?'+':'')+fmtMoney(pnl)+' ('+(pnlPct>=0?'+':'')+pnlPct.toFixed(1)+'%)', pnl>=0?'dv-g':'dv-r'],
-    ['Final price', fmtMoney(state.price), 'dv'],
-    ['Shares held at close', state.shares.toString(), 'dv'],
+    ['Final price', fmtPrice(state.price, state.asset), 'dv'],
+    [state.asset.unit.charAt(0).toUpperCase()+state.asset.unit.slice(1)+' held at close', state.shares.toString(), 'dv'],
     ['Cash at close', fmtMoney(state.cash), 'dv'],
     ['Rounds played', state.round.toString(), 'dv'],
     ['Trades executed', trades.toString(), 'dv'],
@@ -716,7 +1177,20 @@ function endGame(manual){
       <span class="dk">${k}</span>
       <span class="${cls}" style="font-family:var(--mono);font-size:0.78rem">${v}</span>
     </div>`).join('');
+
+  const endAchStrip = document.getElementById('endAchStrip');
+  endAchStrip.innerHTML = state.achievements.size
+    ? [...state.achievements].map(id => `<div class="ach-chip">${ACH_BY_ID[id].label}</div>`).join('')
+    : '<span style="font-family:var(--mono);font-size:0.72rem;color:var(--muted2)">No achievements this run.</span>';
+
+  const entry = {
+    name: state.name, asset: state.asset.short, difficulty: DIFFICULTIES[state.difficulty].label,
+    returnPct: pnlPct, finalValue: portfolioValue, date: new Date().toLocaleDateString()
+  };
+  addToLeaderboard(entry);
+  renderLeaderboardInto('endLbPanel', entry);
 }
 </script>
 </body>
 </html>
+
